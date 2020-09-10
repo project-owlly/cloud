@@ -2,10 +2,6 @@ import * as functions from 'firebase-functions';
 
 import 'firebase-functions/lib/logger/compat';
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+import {getOwlly} from './request/owlly/owlly.get';
+
+export const owlly = functions.https.onRequest(getOwlly);
