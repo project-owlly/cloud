@@ -25,5 +25,10 @@
     "tslint": "^5.12.0",
     "typescript": "^3.8.0"
   },
-  "private": true
+  "private": true,
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  }
 }
