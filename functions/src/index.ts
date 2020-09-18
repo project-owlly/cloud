@@ -1,8 +1,9 @@
 import * as functions from 'firebase-functions';
 import 'firebase-functions/lib/logger/compat';
 
+import * as imap from 'imap-simple';
+
 /* MAILBOX */
-let imaps = require('imap-simple');
 let config = {
   imap: {
     user: functions.config().mailbox.user,
@@ -18,53 +19,44 @@ import {getOwlly} from './request/owlly/owlly.get';
 
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
 
-export const mailbox = functions.region('europe-west6').https.onRequest((req: any, res: any) => {
-  imaps.connect(config).then(function (connection: any) {
-    connection
-      .openBox('INBOX')
-      .then(function () {
-        // Fetch emails from the last 24h
-        let delay = 24 * 3600 * 1000;
-        let yesterday = new Date();
-        yesterday.setTime(Date.now() - delay);
-        let yesterday2 = yesterday.toISOString();
-        let searchCriteria = ['UNSEEN', ['SINCE', yesterday2]];
-        let fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: true};
+export const mailbox = functions.region('europe-west6').https.onRequest(async (req: any, res: any) => {
+  const connection: imap.ImapSimple = await imap.connect(config);
 
-        // retrieve only the headers of the messages
-        return connection.search(searchCriteria, fetchOptions);
-      })
-      .then(function (messages: any) {
-        let attachments = <any>[];
+  await connection.openBox('INBOX');
 
-        messages.forEach(function (message: any) {
-          let parts = imaps.getParts(message.attributes.struct);
-          attachments = attachments.concat(
-            parts
-              .filter(function (part: any) {
-                return part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT';
-              })
-              .map(function (part: any) {
-                // retrieve the attachments only of the messages with attachments
-                return connection.getPartData(message, part).then(function (partData: any) {
-                  return {
-                    filename: part.disposition.params.filename,
-                    data: partData,
-                  };
-                });
-              })
-          );
-        });
+  // Fetch emails from the last 24h
+  const delay = 24 * 3600 * 1000;
+  const yesterday = new Date();
+  yesterday.setTime(Date.now() - delay);
+  const yesterday2 = yesterday.toISOString();
+  const searchCriteria = ['UNSEEN', ['SINCE', yesterday2]];
+  const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: true};
 
-        return Promise.all(attachments);
-      })
-      .then(function (attachments: any) {
-        console.log(attachments);
-        // =>
-        //    [ { filename: 'cats.jpg', data: Buffer() },
-        //      { filename: 'pay-stub.pdf', data: Buffer() } ]
-      });
+  // retrieve only the headers of the messages
+  const messages: imap.Message[] = await connection.search(searchCriteria, fetchOptions);
+
+  let attachments = <any>[];
+
+  messages.forEach((message: imap.Message) => {
+    const parts = imap.getParts(message.attributes.struct as any);
+    attachments = attachments.concat(
+      parts
+        .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
+        .map((part: any) => {
+          // retrieve the attachments only of the messages with attachments
+          return connection.getPartData(message, part).then(function (partData: any) {
+            return {
+              filename: part.disposition.params.filename,
+              data: partData,
+            };
+          });
+        })
+    );
   });
+
+  await Promise.all(attachments);
+
+  console.log(attachments);
 });
 
 export const generatePDF = functions.region('europe-west6').https.onRequest((req: any, res: any) => {
