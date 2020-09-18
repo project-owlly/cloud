@@ -14,7 +14,7 @@ const config = {
   },
 };
 
-export async function mailboxPost(request: functions.Request, response: functions.Response<any>): Promise<void> {
+export async function postMailbox(request: functions.Request, response: functions.Response<any>): Promise<void> {
   const connection: imap.ImapSimple = await imap.connect(config);
 
   await connection.openBox('INBOX');
