@@ -22,7 +22,8 @@
     "firebase-functions": "^3.6.1",
     "imap": "^0.8.19",
     "imap-simple": "^5.0.0",
-    "mailparser": "^3.0.0"
+    "mailparser": "^3.0.0",
+    "openid-client": "^4.1.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.7",
