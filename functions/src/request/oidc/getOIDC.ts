@@ -5,7 +5,7 @@ import {configuration} from './../../config/oidc/schaffhausen';
 /*** ISSUER ***/
 import {Issuer} from 'openid-client';
 
-import {generators} from 'openid-client';
+//import {generators} from 'openid-client';
 
 /******************************************************************/
 //   E I D  /  O I D C  -  S T U F F
