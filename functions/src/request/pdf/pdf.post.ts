@@ -9,8 +9,8 @@ var user = {
 
 };
 
-user.email = request.body.email;
-user.name = request.body.name;
+user.email = request.body.adress;
+user.name = request.body.vorname;
 
 
 const PDFDocument = require('pdfkit');
