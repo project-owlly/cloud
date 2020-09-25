@@ -7,8 +7,6 @@ import * as cors from 'cors';
 /*** ISSUER ***/
 import {Issuer} from 'openid-client';
 
-// import {generators} from 'openid-client';
-
 interface OidAuth {
   url: string;
   token: string;
