@@ -17,33 +17,42 @@ export async function getEidData(request: functions.Request, response: functions
 
       console.log('GET authorization_code: ' + authCode);
 
-      let tokenData = await axios.default.post(
-        configuration.token_endpoint,
-        {
-          code: authCode,
-          grant_type: 'authorization_code',
-          redirect_uri: redirect_uri,
-        },
-        {
-          headers: {
-            Authorization: 'Basic ' + Buffer.from(functions.config().oidc.user + ':' + functions.config().oidc.pwd).toString('base64'),
+      console.log(Buffer.from('Authorization Header: ' + functions.config().oidc.user + ':' + functions.config().oidc.pwd).toString('base64'));
+
+      axios.default
+        .post(
+          configuration.token_endpoint,
+          {
+            code: authCode,
+            grant_type: 'authorization_code',
+            redirect_uri: redirect_uri,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: 'Basic ' + Buffer.from(functions.config().oidc.user + ':' + functions.config().oidc.pwd).toString('base64'),
+            },
+          }
+        )
+        .then(
+          async (tokenData) => {
+            console.log('GET access token: ' + JSON.stringify(tokenData.data));
 
-      console.log('GET access token: ' + JSON.stringify(tokenData.data));
+            let userData = await axios.default.get(configuration.userinfo_endpoint, {
+              headers: {
+                Authorization: 'Bearer ' + tokenData.data.access_token,
+              },
+            });
 
-      let userData = await axios.default.get(configuration.userinfo_endpoint, {
-        headers: {
-          Authorization: 'Bearer ' + tokenData.data.access_token,
-        },
-      });
+            console.log(JSON.stringify(userData.data));
 
-      console.log(JSON.stringify(userData.data));
-
-      response.json({
-        data: userData.data,
-      });
+            response.json({
+              data: userData.data,
+            });
+          },
+          (error) => {
+            console.log('token error' + error.message);
+          }
+        );
     } catch (error) {
       response.json({
         error: error.message,
