@@ -5,6 +5,7 @@ import {getOwlly} from './request/owlly/owlly.get';
 import {postMailbox} from './request/mailbox/postMailbox';
 import {postGeneratePdf} from './request/pdf/pdf.post';
 import {getOIDAuthUrl} from './request/oidc/getOIDC';
+import {getEidData} from './request/oidc/getEidData';
 
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
 
@@ -13,3 +14,5 @@ export const mailbox = functions.region('europe-west6').https.onRequest(postMail
 export const generatePDF = functions.region('europe-west6').https.onRequest(postGeneratePdf);
 
 export const OIDAuthUrl = functions.region('europe-west6').https.onRequest(getOIDAuthUrl);
+
+export const eidData = functions.region('europe-west6').https.onRequest(getEidData);
