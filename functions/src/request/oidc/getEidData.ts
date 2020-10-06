@@ -11,7 +11,7 @@ export async function getEidData(request: functions.Request, response: functions
 
   corsHandler(request, response, async () => {
     try {
-      const authCode = request.body.authorization_code;
+      const authCode = request.body.data.authorization_code;
       const redirect_uri = configuration.redirect_uri_prod;
 
       const form = new FormData();
