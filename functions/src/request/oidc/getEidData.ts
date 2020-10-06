@@ -33,13 +33,10 @@ export async function getEidData(request: functions.Request, response: functions
           });
         });
 
-      console.log('GET access token: ' + JSON.stringify(tokenData.data));
-
       let userData: any = await axios.default
         .get(configuration.userinfo_endpoint, {
           headers: {
             Authorization: 'Bearer ' + tokenData.data.access_token,
-            'Content-Type': 'application/x-www-form-urlencoded',
           },
         })
         .catch((error) => {
@@ -48,8 +45,6 @@ export async function getEidData(request: functions.Request, response: functions
             fullerror: JSON.stringify(error),
           });
         });
-
-      console.log(JSON.stringify(userData.data));
 
       response.json({
         data: userData.data,
