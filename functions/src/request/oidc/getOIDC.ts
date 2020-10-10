@@ -19,7 +19,7 @@ export async function getOIDAuthUrl(request: functions.Request, response: functi
     try {
       const oidAuth = await generateOIDAuthUrl();
 
-      response.json({data: oidAuth});
+      response.json(oidAuth);
     } catch (err) {
       response.status(500).json({
         error: err,
