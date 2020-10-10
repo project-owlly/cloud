@@ -7,7 +7,7 @@ import * as express from 'express';
 
 import {getOwlly} from './request/owlly/owlly.get';
 import {mailboxGet} from './request/mailbox/mailbox.get';
-import {getGeneratePdf} from './request/pdf/pdf.post';
+import {getGeneratePdf} from './request/pdf/pdf.get';
 import {getOIDAuthUrl} from './request/oidc/getOIDC';
 import {getEidData} from './request/oidc/getEidData';
 
