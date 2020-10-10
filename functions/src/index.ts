@@ -6,7 +6,7 @@ import * as cors from 'cors';
 import * as express from 'express';
 
 import {getOwlly} from './request/owlly/owlly.get';
-import {postMailbox} from './request/mailbox/postMailbox';
+import {mailboxGet} from './request/mailbox/mailbox.get';
 import {getGeneratePdf} from './request/pdf/pdf.post';
 import {getOIDAuthUrl} from './request/oidc/getOIDC';
 import {getEidData} from './request/oidc/getEidData';
@@ -17,7 +17,7 @@ appGeneratePdf.get('/:owllyId', getGeneratePdf);
 
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
 
-export const mailbox = functions.region('europe-west6').https.onRequest(postMailbox);
+export const mailbox = functions.region('europe-west6').https.onRequest(mailboxGet);
 
 export const generatePDF = functions.region('europe-west6').https.onRequest(appGeneratePdf);
 
