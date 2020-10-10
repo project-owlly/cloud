@@ -10,7 +10,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
   const corsHandler = cors({origin: true});
 
   corsHandler(request, response, () => {
-    const doc = new PDFDocument();
+    const doc: PDFKit.PDFDocument = new PDFDocument();
 
     doc.text('Hello World! This is the first test for Owlly!', 100, 100);
 
