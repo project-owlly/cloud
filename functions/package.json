@@ -31,6 +31,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.7",
     "@types/imap-simple": "^4.2.3",
+    "@types/pdfkit": "^0.10.6",
     "firebase-functions-test": "^0.2.0",
     "husky": "^4.3.0",
     "prettier": "^2.1.1",
