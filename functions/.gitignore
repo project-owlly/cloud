@@ -10,3 +10,6 @@ node_modules/
 
 lib/
 .runtimeconfig.json
+
+src/config/firebase-credentials.ts
+src/config/project-owlly-firebase-adminsdk-ntjiu-bacd1f6154.json
