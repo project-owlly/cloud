@@ -45,7 +45,7 @@ export async function getEidData(request: functions.Request, response: functions
             fullerror: JSON.stringify(error),
           });
         });
-
+      console.log(JSON.stringify(userData));
       response.json(userData.data);
     } catch (error) {
       response.json({
