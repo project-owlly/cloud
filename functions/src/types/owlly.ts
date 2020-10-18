@@ -1,7 +1,16 @@
 export interface Owlly {
-    id: string;
-    title: string;
-    description?: string;
-    link: string;
-    organisation: string;
+  id: string;
+  published: Date;
+  title: string;
+  link: string;
+  level: string;
+  supporters: string;
+  goals: any;
+  organisation: string;
+  ruleName: string;
+  text: string;
+  campaignerEmail: string;
+  type: string;
+  ruleValue: string;
+  campaignerName: string;
 }
