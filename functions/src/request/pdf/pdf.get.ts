@@ -1,8 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as cors from 'cors';
-import * as PDFDocument from 'pdfkit';
 
-// import {generatePdfContent} from './utils/pdf.utils';
+import {generatePDFDoc} from './utils/pdf.utils';
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
@@ -27,13 +26,11 @@ export function getGeneratePdf(request: functions.Request, response: functions.R
         return;
       }
 
-      const doc: PDFKit.PDFDocument = new PDFDocument();
+      const doc: PDFKit.PDFDocument = await generatePDFDoc();
+
+      // Metadata
 
       (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
-
-      // await generatePdfContent(doc);
-
-      doc.text('Hello World! This is the first test for Owlly!', 100, 100);
 
       // https://stackoverflow.com/a/54355501/5404186
 
