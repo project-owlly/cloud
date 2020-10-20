@@ -57,7 +57,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument) {
   doc.rect(0, 0, 612, 150);
   doc.fill(grad);
 
-  doc.image(`${process.cwd()}/assets/images/images/owlly_top.png`, (doc.page.width - 277 * 0.22) / 2, -15, {scale: 0.22});
+  doc.image(`${process.cwd()}/assets/images/owlly_top.png`, (doc.page.width - 277 * 0.22) / 2, -15, {scale: 0.22});
 
   doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`).fontSize(16).text('KANTONALE VOLKSINITIATIVE', 0, 39.5, {align: 'center'});
 
@@ -73,7 +73,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument) {
 function generatePDFKantonLogo(doc: PDFKit.PDFDocument) {
   doc.lineCap('butt').lineWidth(7).moveTo(0, 150).lineTo(712, 150).stroke('#FEBF15');
 
-  doc.image(`${process.cwd()}/assets/images/images/sh_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {scale: 0.25});
+  doc.image(`${process.cwd()}/assets/images/sh_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {scale: 0.25});
 }
 
 function generatePDFUnterzeichnerBlau(doc: PDFKit.PDFDocument) {
@@ -81,7 +81,7 @@ function generatePDFUnterzeichnerBlau(doc: PDFKit.PDFDocument) {
 }
 
 function generatePDFStempel(doc: PDFKit.PDFDocument) {
-  doc.image(`${process.cwd()}/assets/images/images/stempel_grau.png`, 480, 160, {scale: 0.2});
+  doc.image(`${process.cwd()}/assets/images/stempel_grau.png`, 480, 160, {scale: 0.2});
 
   doc.rotate(-15);
 
@@ -129,7 +129,7 @@ function generatePDFLinesBeschriftungen(doc: PDFKit.PDFDocument) {
 }
 
 function generatePDFDownloadAufruf(doc: PDFKit.PDFDocument) {
-  doc.image(`${process.cwd()}/assets/images/images/unterzeichnen.png`, (doc.page.width - 162 * 0.2) / 2, 400, {scale: 0.2});
+  doc.image(`${process.cwd()}/assets/images/unterzeichnen.png`, (doc.page.width - 162 * 0.2) / 2, 400, {scale: 0.2});
 
   doc
     .fillColor('black')
