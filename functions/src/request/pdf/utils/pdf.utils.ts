@@ -14,7 +14,7 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   doc
     .fillColor('red')
-    .font(__dirname + '/assets/fonts/JustAnotherHand-Regular.ttf')
+    .font(process.cwd() + '/assets/fonts/JustAnotherHand-Regular.ttf')
     .fontSize(16)
     .text('KANTONALE VOLKSINITIATIVE', 0, 39.5, {align: 'center'});
 
