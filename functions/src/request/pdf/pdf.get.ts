@@ -1,14 +1,15 @@
 import * as functions from 'firebase-functions';
 import * as cors from 'cors';
 import * as PDFDocument from 'pdfkit';
-import {generatePdfContent} from './utils/pdf.utils';
+
+// import {generatePdfContent} from './utils/pdf.utils';
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
 }
 
-export function postGeneratePdf(request: functions.Request, response: functions.Response<any>) {
-  //const owllyId: string | undefined = request.params.owllyId;
+export function getGeneratePdf(request: functions.Request, response: functions.Response<any>) {
+  const owllyId: string | undefined = request.params.owllyId;
 
   const corsHandler = cors({
     origin: true,
@@ -16,7 +17,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
   corsHandler(request, response, async () => {
     try {
-      const owllyId: string | undefined = request.body.data.owllyId;
+      // const owllyId: string | undefined = request.body.data.owllyId;
 
       if (!owllyId) {
         response.status(500).json({
@@ -30,7 +31,9 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
       (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
 
-      await generatePdfContent(doc);
+      // await generatePdfContent(doc);
+
+      doc.text('Hello World! This is the first test for Owlly!', 100, 100);
 
       // https://stackoverflow.com/a/54355501/5404186
 
