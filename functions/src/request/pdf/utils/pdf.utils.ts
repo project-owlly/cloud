@@ -1,16 +1,9 @@
-// import * as PDFDocument from 'pdfkit';
-// import * as fs from 'fs';
-
 import * as PDFDocument from 'pdfkit';
-
-import {owllyTop} from './images/owlly_top';
-
-const SVGtoPDF = require('svg-to-pdfkit');
 
 export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument();
 
-  SVGtoPDF(doc, owllyTop, (doc.page.width - 277 * 0.22) / 2, -15, {scale: 0.22});
+  doc.image(process.cwd() + '/assets/images/owlly_top.png', (doc.page.width - 277 * 0.22) / 2, -15, {scale: 0.22});
 
   doc
     .fillColor('red')
@@ -22,17 +15,3 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   return doc;
 }
-
-// (async () => {
-//   try {
-//     const doc: PDFKit.PDFDocument = new PDFDocument();
-//
-//     await generatePdfContent(doc);
-//
-//     doc.pipe(fs.createWriteStream('/tmp/file.pdf'));
-//
-//     doc.end();
-//   } catch (e) {
-//     console.error(e);
-//   }
-// })();
