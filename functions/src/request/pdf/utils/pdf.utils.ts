@@ -30,6 +30,8 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   generatePDFStempel(doc);
 
+  generatePDFUserDaten(doc);
+
   generatePDFLines(doc);
 
   generatePDFLinesBeschriftungen(doc);
@@ -45,8 +47,6 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
   generatePDFInitiativtexte(doc);
 
   generatePDFFooter(doc);
-
-  generatePDFUserDaten(doc);
 
   return doc;
 }
