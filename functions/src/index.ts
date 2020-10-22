@@ -11,6 +11,8 @@ import {getGeneratePdf} from './request/pdf/pdf.get';
 import {getOIDAuthUrl} from './request/oidc/getOIDC';
 import {getEidData} from './request/oidc/getEidData';
 
+import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
+
 const appGeneratePdf = express();
 appGeneratePdf.use(cors({origin: true}));
 appGeneratePdf.get('/:owllyId', getGeneratePdf);
@@ -24,3 +26,5 @@ export const generatePDF = functions.region('europe-west6').https.onRequest(appG
 export const OIDAuthUrl = functions.region('europe-west6').https.onRequest(getOIDAuthUrl);
 
 export const eidData = functions.region('europe-west6').https.onRequest(getEidData);
+
+export const mailboxScheduler = functions.pubsub.schedule('every 15 minutes').onRun(readMailbox);
