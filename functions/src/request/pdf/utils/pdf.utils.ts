@@ -54,6 +54,8 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   generatePDFFooter(doc);
 
+  doc.end()
+
   return doc;
 }
 
