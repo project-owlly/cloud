@@ -1,4 +1,5 @@
 import * as PDFDocument from 'pdfkit';
+//import { switchToPage } from 'pdfkit';
 
 import {format} from 'date-fns';
 
@@ -15,12 +16,17 @@ const initiative = {
 const user = {
   vorname: 'Sandro',
   nachname: 'Scalco',
-  birthday: '3. Juni 1988',
-  adress: 'Villenstrasse 4, 8200 Schaffhausen',
+  birthday: '12. September 1848',
+  adress: 'Stadtstrasse 1, 8200 Schaffhausen',
 };
 
 export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
-  const doc: PDFKit.PDFDocument = new PDFDocument();
+  const doc: PDFKit.PDFDocument = new PDFDocument({
+    size: 'A4',
+    margins: {top: 20, left: 25, bottom: 20, right: 25},
+    bufferPages: true,
+  });
+  doc.switchToPage(0);
 
   generatePDFHeader(doc);
 
