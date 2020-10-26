@@ -27,4 +27,4 @@ export const OIDAuthUrl = functions.region('europe-west6').https.onRequest(getOI
 
 export const eidData = functions.region('europe-west6').https.onRequest(getEidData);
 
-export const mailboxScheduler = functions.pubsub.schedule('every 15 minutes').onRun(readMailbox);
+export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 15 minutes').onRun(readMailbox);
