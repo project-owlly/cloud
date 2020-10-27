@@ -23,7 +23,7 @@ const user = {
 export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
     size: 'A4',
-    margins: {top: 20, left: 25, bottom: 20, right: 25},
+    // margins: {top: 20, left: 25, bottom: 20, right: 25},
     bufferPages: true,
   });
   doc.switchToPage(0);
@@ -54,7 +54,7 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   generatePDFFooter(doc);
 
-  doc.end()
+  //doc.end()
 
   return doc;
 }
