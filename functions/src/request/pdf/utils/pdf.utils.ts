@@ -23,7 +23,7 @@ const user = {
 export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
     size: 'A4',
-    // margins: {top: 20, left: 25, bottom: 20, right: 25},
+    margins: {top: 0, left: 0, bottom: 0, right: 0},
     bufferPages: true,
   });
   doc.switchToPage(0);
@@ -54,7 +54,6 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   generatePDFFooter(doc);
 
-  //doc.end()
 
   return doc;
 }
@@ -159,7 +158,7 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument) {
 
   doc.rect(35, 570 + doc.heightOfString(initiative.initiativtext), doc.page.width - 70, doc.heightOfString(initiative.urheber) + 20).fill('#f1f1f1');
 
-  doc.rect(35, 725, doc.page.width - 70, 30).fill('#f1f1f1');
+  doc.rect(35, 745, doc.page.width - 70, 30).fill('#f1f1f1');
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument) {
@@ -179,7 +178,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument) {
       align: 'left',
     });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 730, {align: 'left'});
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {align: 'left'});
 }
 
 function generatePDFInitiativtexte(doc: PDFKit.PDFDocument) {
@@ -201,20 +200,20 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument) {
     .fontSize(8)
     .text(initiative.urheber, 45, 585 + doc.heightOfString(initiative.initiativtext), {align: 'left', width: doc.page.width - 90});
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Das ist die Rückzugsklausel', 45, 740, {align: 'left'});
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Das ist die Rückzugsklausel', 45, 760, {align: 'left'});
 }
 
 function generatePDFFooter(doc: PDFKit.PDFDocument) {
   const grad2: PDFKit.PDFLinearGradient = doc.linearGradient(0, 0, 612, 150);
   grad2.stop(0, '#81bc4f').stop(1, '#00a6d4');
-  doc.rect(0, 765, doc.page.width, 50);
+  doc.rect(0, 792, doc.page.width, 50);
   doc.fill(grad2);
 
   doc
     .fillColor('white')
     .font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`)
     .fontSize(9)
-    .text('owlly.ch | enabling digital democracy', 0, 772, {align: 'center'});
+    .text('owlly.ch | enabling digital democracy', 0, 812, {align: 'center'});
 }
 
 function generatePDFUserDaten(doc: PDFKit.PDFDocument) {
