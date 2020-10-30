@@ -7,8 +7,8 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
 }
 
-export function getGeneratePdf(request: functions.Request, response: functions.Response<any>) {
-  const owllyId: string | undefined = request.params.owllyId;
+export function postGeneratePdf(request: functions.Request, response: functions.Response<any>) {
+  const owllyId: string | undefined = request.body.data.owllyId;
 
   const corsHandler = cors({
     origin: true,
