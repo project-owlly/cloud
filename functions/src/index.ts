@@ -10,6 +10,7 @@ import {getEidData} from './request/oidc/getEidData';
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
 import {sendNewsletterWelcomeMail} from './firestore/newsletter/newsletter.create';
+import {sendFeedbackThankYouMail} from './firestore/feedback/feedback.create';
 
 //HTTP Requests
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
@@ -23,3 +24,4 @@ export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule
 
 // FIRESTORE DATABASE Listener
 export const newsletterWelcomeEmail = functions.region('europe-west6').firestore.document('/newsletter/{id}').onCreate(sendNewsletterWelcomeMail);
+export const feedbackThankyouEmail = functions.region('europe-west6').firestore.document('/feedback/{id}').onCreate(sendFeedbackThankYouMail);
