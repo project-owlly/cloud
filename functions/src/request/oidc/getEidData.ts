@@ -14,6 +14,7 @@ export async function getEidData(request: functions.Request, response: functions
       const authCode = request.body.data.authorization_code;
       const redirect_uri = configuration.redirect_uri_prod;
 
+      console.log(authCode);
       const form = new FormData();
       form.append('code', authCode);
       form.append('grant_type', 'authorization_code');
@@ -45,8 +46,10 @@ export async function getEidData(request: functions.Request, response: functions
             fullerror: JSON.stringify(error),
           });
         });
-      console.log(JSON.stringify(userData));
-      response.json(userData.data);
+      //console.log(JSON.stringify(userData));
+      response.json({
+        data: userData.data, //data is needed for onRequest, it's standard if onCall is used.
+      });
     } catch (error) {
       response.json({
         error: error.message,

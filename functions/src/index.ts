@@ -17,6 +17,6 @@ export const generatePDF = functions.region('europe-west6').https.onRequest(post
 
 export const OIDAuthUrl = functions.region('europe-west6').https.onRequest(getOIDAuthUrl);
 
-export const eidData = functions.region('europe-west6').https.onRequest(getEidData);
+export const eidData = functions.region('europe-west6').https.onRequest(getEidData); //could be "onCall" for callable functions
 
 export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 15 minutes').onRun(readMailbox);
