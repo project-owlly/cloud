@@ -9,15 +9,16 @@ import {Issuer} from 'openid-client';
 
 interface OidAuth {
   url: string;
-  token: string;
+  state: string | undefined;
 }
 
 export async function getOIDAuthUrl(request: functions.Request, response: functions.Response<any>) {
   const corsHandler = cors({origin: true});
+  const state: string | undefined = request.body.state;
 
   corsHandler(request, response, async () => {
     try {
-      const oidAuth = await generateOIDAuthUrl();
+      const oidAuth = await generateOIDAuthUrl(state);
 
       response.json(oidAuth);
     } catch (err) {
@@ -31,7 +32,7 @@ export async function getOIDAuthUrl(request: functions.Request, response: functi
 /******************************************************************/
 //   E I D  /  O I D C  -  S T U F F
 /******************************************************************/
-export async function generateOIDAuthUrl(): Promise<OidAuth> {
+export async function generateOIDAuthUrl(state: string | undefined): Promise<OidAuth> {
   //change autodiscovery based on REQUEST.PARAM
 
   //autodiscovery, if system changes
@@ -49,13 +50,12 @@ export async function generateOIDAuthUrl(): Promise<OidAuth> {
   const redirect_uri = configuration.redirect_uri_prod;
 
   const authorizationUrl = client.authorizationUrl({
-    //state: token,
+    state: state,
     redirect_uri: redirect_uri,
-    scope: scope, //
+    scope: scope,
   });
 
   //const token = crypto.randomBytes(64).toString('hex');
-  const token = 'testtoken';
 
   //https://www.npmjs.com/package/openid-client
   //Authorization Code Flow
@@ -63,6 +63,6 @@ export async function generateOIDAuthUrl(): Promise<OidAuth> {
 
   return {
     url: authorizationUrl,
-    token: token,
+    state: state,
   };
 }
