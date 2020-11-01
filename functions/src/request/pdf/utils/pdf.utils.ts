@@ -2,7 +2,7 @@ import * as PDFDocument from 'pdfkit';
 //import { switchToPage } from 'pdfkit';
 
 import {format} from 'date-fns';
-
+/*
 // TODO: Real data
 const initiative = {
   titel: 'DAS IST DER MUSTERTITEL',
@@ -18,9 +18,9 @@ const user = {
   nachname: 'Scalco',
   birthday: '12. September 1848',
   adress: 'Stadtstrasse 1, 8200 Schaffhausen',
-};
+};*/
 
-export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
+export async function generatePDFDoc(initiative: any): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
     size: 'A4',
     margins: {top: 0, left: 0, bottom: 0, right: 0},
@@ -28,7 +28,7 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
   });
   doc.switchToPage(0);
 
-  generatePDFHeader(doc);
+  generatePDFHeader(doc, initiative);
 
   generatePDFKantonLogo(doc);
 
@@ -36,7 +36,7 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   generatePDFStempel(doc);
 
-  generatePDFUserDaten(doc);
+  generatePDFUserDaten(doc, initiative);
 
   generatePDFLines(doc);
 
@@ -46,11 +46,11 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
 
   generatePDFLine(doc);
 
-  generatePDFGraueRechteckeUnten(doc);
+  generatePDFGraueRechteckeUnten(doc, initiative);
 
-  generatePDFBeschriftungGraueRechtecke(doc);
+  generatePDFBeschriftungGraueRechtecke(doc, initiative);
 
-  generatePDFInitiativtexte(doc);
+  generatePDFInitiativtexte(doc, initiative);
 
   generatePDFFooter(doc);
 
@@ -58,7 +58,7 @@ export async function generatePDFDoc(): Promise<PDFKit.PDFDocument> {
   return doc;
 }
 
-function generatePDFHeader(doc: PDFKit.PDFDocument) {
+function generatePDFHeader(doc: PDFKit.PDFDocument, initiative: any) {
   const grad: PDFKit.PDFLinearGradient = doc.linearGradient(0, 0, 612, 150);
   grad.stop(0, '#00a6d4').stop(1, '#81bc4f');
   doc.rect(0, 0, 612, 150);
@@ -151,7 +151,7 @@ function generatePDFLine(doc: PDFKit.PDFDocument) {
   doc.lineCap('butt').lineWidth(1).moveTo(0, 495).lineTo(doc.page.width, 495).dash(1, {}).stroke('#888888');
 }
 
-function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument) {
+function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, initiative: any) {
   doc.rect(35, 510, doc.page.width - 70, 30).fill('#f1f1f1');
 
   doc.rect(35, 545, doc.page.width - 70, doc.heightOfString(initiative.initiativtext) + 20).fill('#f1f1f1');
@@ -161,7 +161,7 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument) {
   doc.rect(35, 745, doc.page.width - 70, 30).fill('#f1f1f1');
 }
 
-function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument) {
+function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, initiative: any) {
   doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Hinweis strafbar', 45, 515, {align: 'left'});
 
   doc
@@ -181,7 +181,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument) {
   doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {align: 'left'});
 }
 
-function generatePDFInitiativtexte(doc: PDFKit.PDFDocument) {
+function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, initiative: any) {
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
@@ -216,22 +216,22 @@ function generatePDFFooter(doc: PDFKit.PDFDocument) {
     .text('owlly.ch | enabling digital democracy', 0, 812, {align: 'center'});
 }
 
-function generatePDFUserDaten(doc: PDFKit.PDFDocument) {
+function generatePDFUserDaten(doc: PDFKit.PDFDocument, initiative: any) {
   doc
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(30)
-    .text(user.vorname + ' ' + user.nachname, 0, 255, {align: 'center'});
+    .text(initiative.vorname + ' ' + initiative.nachname, 0, 255, {align: 'center'});
 
   doc
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(16)
-    .text(user.birthday, (220 + doc.widthOfString(user.birthday)) / 2, 325, {align: 'left'});
+    .text(initiative.birthday, (220 + doc.widthOfString(initiative.birthday)) / 2, 325, {align: 'left'});
 
   doc
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(16)
-    .text(user.adress, (doc.page.width - 200 + doc.widthOfString(user.adress)) / 2, 325, {align: 'left'});
+    .text(initiative.adress, (doc.page.width - 200 + doc.widthOfString(initiative.adress)) / 2, 325, {align: 'left'});
 }

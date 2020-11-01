@@ -26,7 +26,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
         return;
       }
 
-      const doc: PDFKit.PDFDocument = await generatePDFDoc();
+      const doc: PDFKit.PDFDocument = await generatePDFDoc(request.body);
 
       // Metadata
 
