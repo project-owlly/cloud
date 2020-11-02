@@ -16,8 +16,6 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
   corsHandler(request, response, async () => {
     try {
-      // const owllyId: string | undefined = request.body.data.owllyId;
-
       if (!owllyId) {
         response.status(500).json({
           error: 'OwllyId not provided',
@@ -26,7 +24,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
         return;
       }
 
-      const doc: PDFKit.PDFDocument = await generatePDFDoc(request.body);
+      const doc: PDFKit.PDFDocument = await generatePDFDoc(request.body.data);
 
       // Metadata
 
