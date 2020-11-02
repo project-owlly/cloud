@@ -13,9 +13,6 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
 }
 
 export function postGeneratePdf(request: functions.Request, response: functions.Response<any>) {
-  const owllyId: string | undefined = request.body.data.owllyId;
-  const eId: string = request.body.data.userData.sub;
-
   const corsHandler = cors({
     origin: true,
     methods: 'POST',
@@ -23,6 +20,9 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
   corsHandler(request, response, async () => {
     try {
+      const owllyId: string | undefined = request.body.data.owllyId;
+      const eId: string = request.body.data.userData.sub;
+
       if (!owllyId) {
         response.status(500).json({
           error: 'OwllyId not provided',
