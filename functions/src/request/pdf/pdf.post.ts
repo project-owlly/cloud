@@ -18,6 +18,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
   const corsHandler = cors({
     origin: true,
+    methods: 'POST',
   });
 
   corsHandler(request, response, async () => {
