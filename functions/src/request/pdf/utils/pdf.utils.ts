@@ -1,42 +1,28 @@
 import * as PDFDocument from 'pdfkit';
-//import { switchToPage } from 'pdfkit';
-
 import {format} from 'date-fns';
-/*
-// TODO: Real data
-const initiative = {
-  titel: 'DAS IST DER MUSTERTITEL',
-  datum: 'xx.xx.xxxx',
-  initiativtext:
-    'Cillum ut ea aliqua id laboris ad ullamco nisi enim magna. Id ad cupidatat laborum officia veniam cillum cillum aliqua tempor commodo sunt. Minim in officia labore magna officia et dolor in velit sunt ea nostrud consectetur.',
-  urheber: 'Max Mustermann',
-};
 
-// TODO: Real data
-const user = {
-  vorname: 'Sandro',
-  nachname: 'Scalco',
-  birthday: '12. September 1848',
-  adress: 'Stadtstrasse 1, 8200 Schaffhausen',
-};*/
-
-export async function generatePDFDoc(initiative: any): Promise<PDFKit.PDFDocument> {
+export async function generatePDFDoc(data: any): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
     size: 'A4',
-    margins: {top: 0, left: 0, bottom: 0, right: 0},
+    margins: {
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+    },
     bufferPages: true,
   });
   doc.switchToPage(0);
 
-  generatePDFHeader(doc, initiative);
+  generatePDFHeader(doc, data);
 
-  generatePDFKantonLogo(doc);
+  generatePDFKantonLogo(doc, data);
 
   generatePDFUnterzeichnerBlau(doc);
 
   generatePDFStempel(doc);
 
-  generatePDFUserDaten(doc, initiative);
+  generatePDFUserDaten(doc, data);
 
   generatePDFLines(doc);
 
@@ -46,63 +32,111 @@ export async function generatePDFDoc(initiative: any): Promise<PDFKit.PDFDocumen
 
   generatePDFLine(doc);
 
-  generatePDFGraueRechteckeUnten(doc, initiative);
+  generatePDFGraueRechteckeUnten(doc, data);
 
-  generatePDFBeschriftungGraueRechtecke(doc, initiative);
+  generatePDFBeschriftungGraueRechtecke(doc, data);
 
-  generatePDFInitiativtexte(doc, initiative);
+  generatePDFInitiativtexte(doc, data);
 
   generatePDFFooter(doc);
-
 
   return doc;
 }
 
-function generatePDFHeader(doc: PDFKit.PDFDocument, initiative: any) {
+function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
   const grad: PDFKit.PDFLinearGradient = doc.linearGradient(0, 0, 612, 150);
   grad.stop(0, '#00a6d4').stop(1, '#81bc4f');
   doc.rect(0, 0, 612, 150);
   doc.fill(grad);
 
-  doc.image(`${process.cwd()}/assets/images/owlly_top.png`, (doc.page.width - 277 * 0.22) / 2, -15, {scale: 0.22});
+  doc.image(`${process.cwd()}/assets/images/owlly_top.png`, (doc.page.width - 277 * 0.22) / 2, -15, {
+    scale: 0.22,
+  });
 
-  doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`).fontSize(16).text('KANTONALE VOLKSINITIATIVE', 0, 39.5, {align: 'center'});
+  if (data.owllyData.type === 'initiative') {
+    if (data.owllyData.level === 'canton') {
+      doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`).fontSize(16).text('KANTONALE VOLKSINITIATIVE', 0, 39.5, {
+        align: 'center',
+      });
+    } else {
+      doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`).fontSize(16).text('EIDGENÖSSISCHE VOLKSINITIATIVE', 0, 39.5, {
+        align: 'center',
+      });
+    }
+  } else if (data.owllyData.type === 'referendum') {
+    if (data.owllyData.level === 'canton') {
+      doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`).fontSize(16).text('REFERENDUM', 0, 39.5, {
+        align: 'center',
+      });
+    } else {
+      doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`).fontSize(16).text('REFERENDUM', 0, 39.5, {
+        align: 'center',
+      });
+    }
+  }
 
-  doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(30).text(initiative.titel, 0, 59.5, {align: 'center'});
+  doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(30).text(data.owllyData.title, 0, 59.5, {
+    align: 'center',
+  });
 
-  doc
-    .fillColor('white')
-    .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
-    .fontSize(10)
-    .text('Veröffentlicht am' + ' ' + initiative.datum, 0, 95, {align: 'center'});
+  if (data.owllyData.type === 'referendum') {
+    doc
+      .fillColor('white')
+      .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
+      .fontSize(10)
+      .text('Beginn der Referendumsfrist am ' + ' ' + data.owllyData.published + ' im Bundesblatt veröffentlicht.', 0, 95, {
+        align: 'center',
+      });
+  } else if (data.owllyData.type === 'initiative') {
+    doc
+      .fillColor('white')
+      .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
+      .fontSize(10)
+      .text('Im Bundesblatt veröffentlicht am ' + ' ' + data.owllyData.published, 0, 95, {
+        align: 'center',
+      });
+  }
 }
 
-function generatePDFKantonLogo(doc: PDFKit.PDFDocument) {
+function generatePDFKantonLogo(doc: PDFKit.PDFDocument, data: any) {
   doc.lineCap('butt').lineWidth(7).moveTo(0, 150).lineTo(712, 150).stroke('#FEBF15');
 
-  doc.image(`${process.cwd()}/assets/images/sh_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {scale: 0.25});
+  if ((data.owllyData.level = 'canton')) {
+    doc.image(`${process.cwd()}/assets/images/` + data.owllyData.ruleValue + `_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {
+      scale: 0.25,
+    });
+  } else {
+    //national
+    doc.image(`${process.cwd()}/assets/images/ch_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {
+      scale: 0.25,
+    });
+  }
 }
 
 function generatePDFUnterzeichnerBlau(doc: PDFKit.PDFDocument) {
-  doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(16).text('UNTERZEICHNER', 0, 210, {align: 'center'});
+  doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(16).text('UNTERZEICHNER', 0, 210, {
+    align: 'center',
+  });
 }
 
 function generatePDFStempel(doc: PDFKit.PDFDocument) {
-  doc.image(`${process.cwd()}/assets/images/stempel_grau.png`, 480, 160, {scale: 0.2});
+  doc.image(`${process.cwd()}/assets/images/stempel_grau.png`, 480, 160, {
+    scale: 0.2,
+  });
 
   doc.rotate(-15);
 
-  doc
-    .fillColor('#929496')
-    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(16)
-    .text(format(new Date(), 'MM.dd.yyyy'), 416, 328, {align: 'left'});
+  doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'MM.dd.yyyy'), 416, 328, {
+    align: 'left',
+  });
 
   doc
     .fillColor('#929496')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(format(new Date(), 'HH:mm') + ' Uhr', 438, 348, {align: 'left'});
+    .text(format(new Date(), 'HH:mm') + ' Uhr', 438, 348, {
+      align: 'left',
+    });
 
   doc.rotate(15);
 }
@@ -128,79 +162,125 @@ function generatePDFLines(doc: PDFKit.PDFDocument) {
 }
 
 function generatePDFLinesBeschriftungen(doc: PDFKit.PDFDocument) {
-  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Vorname, Name', 0, 284, {align: 'center'});
+  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Vorname, Name', 0, 284, {
+    align: 'center',
+  });
 
-  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Geboren am', 140, 345, {align: 'left'});
+  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Geburtsdatum', 140, 345, {
+    align: 'left',
+  });
 
-  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Adresse', 360, 345, {align: 'left'});
+  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Adresse', 360, 345, {
+    align: 'left',
+  });
 }
 
 function generatePDFDownloadAufruf(doc: PDFKit.PDFDocument) {
-  doc.image(`${process.cwd()}/assets/images/unterzeichnen.png`, (doc.page.width - 162 * 0.2) / 2, 400, {scale: 0.2});
+  doc.image(`${process.cwd()}/assets/images/unterzeichnen.png`, (doc.page.width - 162 * 0.2) / 2, 400, {
+    scale: 0.2,
+  });
 
-  doc
-    .fillColor('black')
-    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
-    .text('Dokument digital signieren und retournieren an', 0, 450, {align: 'center'});
+  doc.fillColor('black').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Dokument digital signieren und retournieren an', 0, 450, {
+    align: 'center',
+  });
 
-  doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('briefkasten@owlly.ch', 0, 462, {align: 'center'});
+  doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('briefkasten@owlly.ch', 0, 462, {
+    align: 'center',
+  });
 }
 
 function generatePDFLine(doc: PDFKit.PDFDocument) {
   doc.lineCap('butt').lineWidth(1).moveTo(0, 495).lineTo(doc.page.width, 495).dash(1, {}).stroke('#888888');
 }
 
-function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, initiative: any) {
+function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
   doc.rect(35, 510, doc.page.width - 70, 30).fill('#f1f1f1');
 
-  doc.rect(35, 545, doc.page.width - 70, doc.heightOfString(initiative.initiativtext) + 20).fill('#f1f1f1');
+  doc.rect(35, 545, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 20).fill('#f1f1f1');
 
-  doc.rect(35, 570 + doc.heightOfString(initiative.initiativtext), doc.page.width - 70, doc.heightOfString(initiative.urheber) + 20).fill('#f1f1f1');
+  doc.rect(35, 570 + doc.heightOfString(data.owllyData.text), doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1');
 
   doc.rect(35, 745, doc.page.width - 70, 30).fill('#f1f1f1');
 }
 
-function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, initiative: any) {
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Hinweis strafbar', 45, 515, {align: 'left'});
+function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
+  doc
+    .fillColor('#a6a8aa')
+    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
+    .fontSize(8)
+    .text(
+      'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
+      45,
+      515,
+      {
+        align: 'left',
+      }
+    );
+
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text(data.owllyData.text, 45, 550, {
+    align: 'left',
+  });
 
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text('Wortlaut des Begehrens, Vollständiger Initiativtext', 45, 550, {align: 'left'});
-
-  doc
-    .fillColor('#a6a8aa')
-    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
-    .text('Name und Adresse des Urhebers oder Urheber der Initiative (Initiativkomitee)', 45, 575 + doc.heightOfString(initiative.initiativtext), {
+    .text('Name und Adresse des Urhebers oder Urheber der Initiative (Initiativkomitee)', 45, 575 + doc.heightOfString(data.owllyData.author), {
       align: 'left',
     });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {align: 'left'});
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {
+    align: 'left',
+  });
 }
 
-function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, initiative: any) {
+function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text('Du machst dich strafbar wenn dies und das', 45, 525, {align: 'left'});
+    .text(
+      'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
+      45,
+      525,
+      {
+        align: 'left',
+      }
+    );
 
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(initiative.initiativtext, 45, 560, {align: 'left', width: doc.page.width - 90});
+    .text(data.owllyData.text, 45, 560, {
+      align: 'left',
+      width: doc.page.width - 90,
+    });
 
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(initiative.urheber, 45, 585 + doc.heightOfString(initiative.initiativtext), {align: 'left', width: doc.page.width - 90});
+    .text(data.owllyData.author, 45, 585 + doc.heightOfString(data.owllyData.text), {
+      align: 'left',
+      width: doc.page.width - 90,
+    });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Das ist die Rückzugsklausel', 45, 760, {align: 'left'});
+  //if Initiative
+  if (data.owllyData.type === 'initiative') {
+    doc
+      .fillColor('#a6a8aa')
+      .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
+      .fontSize(8)
+      .text(
+        'Das Initiativkomitee, bestehend aus nachstehenden Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
+        45,
+        760,
+        {
+          align: 'left',
+        }
+      );
+  }
 }
 
 function generatePDFFooter(doc: PDFKit.PDFDocument) {
@@ -209,29 +289,33 @@ function generatePDFFooter(doc: PDFKit.PDFDocument) {
   doc.rect(0, 792, doc.page.width, 50);
   doc.fill(grad2);
 
-  doc
-    .fillColor('white')
-    .font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`)
-    .fontSize(9)
-    .text('owlly.ch | enabling digital democracy', 0, 812, {align: 'center'});
+  doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(9).text('owlly.ch | enabling digital democracy', 0, 812, {
+    align: 'center',
+  });
 }
 
-function generatePDFUserDaten(doc: PDFKit.PDFDocument, initiative: any) {
+function generatePDFUserDaten(doc: PDFKit.PDFDocument, data: any) {
   doc
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(30)
-    .text(initiative.vorname + ' ' + initiative.nachname, 0, 255, {align: 'center'});
+    .text(data.userData.given_name + ' ' + data.userData.family_name, 0, 255, {
+      align: 'center',
+    });
 
   doc
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(16)
-    .text(initiative.birthday, (220 + doc.widthOfString(initiative.birthday)) / 2, 325, {align: 'left'});
+    .text(data.userData.birth_date, (220 + doc.widthOfString(data.userData.birth_date)) / 2, 325, {
+      align: 'left',
+    });
 
   doc
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(16)
-    .text(initiative.adress, (doc.page.width - 200 + doc.widthOfString(initiative.adress)) / 2, 325, {align: 'left'});
+    .text(data.userData.street_address, (doc.page.width - 200 + doc.widthOfString(data.userData.street_address)) / 2, 325, {
+      align: 'left',
+    });
 }
