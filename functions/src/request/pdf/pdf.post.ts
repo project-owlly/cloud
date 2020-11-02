@@ -32,7 +32,10 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
       let formData: any = request.body.data;
       const owllyData = await db.collection('owlly').doc(owllyId).get();
-      formData.owllyData = owllyData.data();
+      if (owllyData.exists) {
+        //für testformular auf owllywebsite
+        formData.owllyData = owllyData.data();
+      }
 
       const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
