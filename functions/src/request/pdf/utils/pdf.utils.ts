@@ -101,7 +101,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
 function generatePDFKantonLogo(doc: PDFKit.PDFDocument, data: any) {
   doc.lineCap('butt').lineWidth(7).moveTo(0, 150).lineTo(712, 150).stroke('#FEBF15');
 
-  if ((data.owllyData.level = 'canton')) {
+  if (data.owllyData.level === 'canton') {
     doc.image(`${process.cwd()}/assets/images/` + data.owllyData.ruleValue + `_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {
       scale: 0.25,
     });
