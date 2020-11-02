@@ -35,7 +35,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
       // https://stackoverflow.com/a/54355501/5404186
 
-      response.setHeader('Content-disposition', `attachment; filename="${owllyId}.pdf"`);
+      response.setHeader('Content-disposition', `attachment; filename="${owllyId + '-' + eId}.pdf"`);
       response.setHeader('Content-type', 'application/pdf');
 
       doc.pipe(response.status(200));
