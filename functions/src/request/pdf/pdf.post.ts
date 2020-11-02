@@ -5,10 +5,12 @@ import {generatePDFDoc} from './utils/pdf.utils';
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
+  Eid: string;
 }
 
 export function postGeneratePdf(request: functions.Request, response: functions.Response<any>) {
   const owllyId: string | undefined = request.body.data.owllyId;
+  const eId: string = request.body.data.userData.sub;
 
   const corsHandler = cors({
     origin: true,
@@ -29,6 +31,7 @@ export function postGeneratePdf(request: functions.Request, response: functions.
       // Metadata
 
       (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
+      (doc.info as OwllyDocumentInfo).Eid = eId;
 
       // https://stackoverflow.com/a/54355501/5404186
 
