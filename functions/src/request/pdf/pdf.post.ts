@@ -1,7 +1,11 @@
 import * as functions from 'firebase-functions';
 import * as cors from 'cors';
 
+import * as admin from 'firebase-admin';
+
 import {generatePDFDoc} from './utils/pdf.utils';
+
+const db = admin.firestore();
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
@@ -26,10 +30,13 @@ export function postGeneratePdf(request: functions.Request, response: functions.
         return;
       }
 
-      const doc: PDFKit.PDFDocument = await generatePDFDoc(request.body.data);
+      let formData: any = request.body.data;
+      const owllyData = await db.collection('owlly').doc(owllyId).get();
+      formData.owllyData = owllyData.data();
+
+      const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
       // Metadata
-
       (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
       (doc.info as OwllyDocumentInfo).Eid = eId;
 
