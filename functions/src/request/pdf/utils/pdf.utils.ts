@@ -102,12 +102,12 @@ function generatePDFKantonLogo(doc: PDFKit.PDFDocument, data: any) {
   doc.lineCap('butt').lineWidth(7).moveTo(0, 150).lineTo(712, 150).stroke('#FEBF15');
 
   if (data.owllyData.level === 'canton') {
-    doc.image(`${process.cwd()}/assets/images/` + data.owllyData.ruleValue + `_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {
+    doc.image(`${process.cwd()}/assets/images/flags/` + String(data.owllyData.ruleValue).toLocaleUpperCase + `.png`, (doc.page.width - 162 / 4) / 2, 130, {
       scale: 0.25,
     });
   } else {
     //national
-    doc.image(`${process.cwd()}/assets/images/ch_wappen.png`, (doc.page.width - 162 / 4) / 2, 130, {
+    doc.image(`${process.cwd()}/assets/images/flags/CH.png`, (doc.page.width - 162 / 4) / 2, 130, {
       scale: 0.25,
     });
   }
