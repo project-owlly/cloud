@@ -2,8 +2,6 @@ import * as functions from 'firebase-functions';
 
 import {configuration} from './../../config/oidc/schaffhausen';
 
-import * as cors from 'cors';
-
 /*** ISSUER ***/
 import {Issuer} from 'openid-client';
 
@@ -12,21 +10,20 @@ interface OidAuth {
   state: string | undefined;
 }
 
-export async function getOIDAuthUrl(request: functions.Request, response: functions.Response<any>) {
-  const corsHandler = cors({origin: true});
-  const state: string | undefined = request.body.state;
+interface OidAuthDataRequest {
+  state: string; // currently owllyId
+}
 
-  corsHandler(request, response, async () => {
-    try {
-      const oidAuth = await generateOIDAuthUrl(state);
+export async function callOIDAuthUrl(data: OidAuthDataRequest, context: functions.EventContext): Promise<OidAuth | undefined> {
+  const state: string | undefined = data.state;
 
-      response.json(oidAuth);
-    } catch (err) {
-      response.status(500).json({
-        error: err,
-      });
-    }
-  });
+  if (!state) {
+    return undefined;
+  }
+
+  const oidAuth = await generateOIDAuthUrl(state);
+
+  return oidAuth;
 }
 
 /******************************************************************/
