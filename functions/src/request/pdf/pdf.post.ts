@@ -56,14 +56,11 @@ export async function postGeneratePdf(data: any, context: CallableContext): Prom
 
   doc.end();
 
-  owllyPDF
-    .getSignedUrl({
-      action: 'read',
-      expires: new Date().toISOString().substr(0, 10),
-    })
-    .then((signedUrl) => {
-      return {
-        url: signedUrl[0],
-      };
-    });
+  const signedURL = await owllyPDF.getSignedUrl({
+    action: 'read',
+    expires: new Date().toISOString().substr(0, 10),
+  });
+  return {
+    url: signedURL[0],
+  };
 }
