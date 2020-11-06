@@ -45,31 +45,25 @@ export function postGeneratePdf(request: functions.Request, response: functions.
 
       const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
-      // Metadata
-      (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
-      (doc.info as OwllyDocumentInfo).Eid = eId;
-
-      // https://stackoverflow.com/a/54355501/5404186
-
-      response.setHeader('Content-disposition', `attachment; filename="${owllyId + '-' + eId}.pdf"`);
-      response.setHeader('Content-type', 'application/pdf');
-
       //doc.pipe(response.status(200));
       const stream = doc.pipe(
         owllyPDF.createWriteStream({
           contentType: 'application/pdf',
           metadata: {
             customMetadata: {
-              //"titel": initiative.titel,
-              //"subtitel": initiative.subtitel,
-              //"text": initiative.text,
-              //"eid": user.sub
+              owllyId: owllyId,
+              eId: eId,
             },
           },
         })
       ); //save to firebase bucket
 
+      // Metadata
+      (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
+      (doc.info as OwllyDocumentInfo).Eid = eId;
+
       doc.end();
+
       owllyPDF
         .getSignedUrl({
           action: 'read',
