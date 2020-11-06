@@ -15,7 +15,6 @@ import {sendFeedbackThankYouMail} from './firestore/feedback/feedback.create';
 //HTTP Requests
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
 export const mailbox = functions.region('europe-west6').https.onRequest(mailboxGet);
-export const generatePDF = functions.region('europe-west6').https.onRequest(postGeneratePdf);
 export const eidData = functions.region('europe-west6').https.onRequest(getEidData); //could be "onCall" for callable functions
 
 //scheduler
@@ -27,3 +26,4 @@ export const feedbackThankyouEmail = functions.region('europe-west6').firestore.
 
 //onCall
 export const OIDAuthUrl = functions.region('europe-west6').https.onCall(callOIDAuthUrl);
+export const generatePDF = functions.region('europe-west6').https.onCall(postGeneratePdf);
