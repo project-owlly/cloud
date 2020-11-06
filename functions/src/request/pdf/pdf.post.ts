@@ -1,6 +1,3 @@
-import * as functions from 'firebase-functions';
-import * as cors from 'cors';
-
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 import * as admin from 'firebase-admin';
 
@@ -12,8 +9,11 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
   Eid: string;
 }
+interface PDFDataRequest {
+  url: string; // currently owllyId
+}
 
-export async function postGeneratePdf(data: any, context: CallableContext) {
+export async function postGeneratePdf(data: any, context: CallableContext): Promise<any | undefined> {
   const owllyId: string | undefined = data.owllyId;
   const eId: string = data.userData.sub;
 
