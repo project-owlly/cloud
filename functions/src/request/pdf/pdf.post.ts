@@ -38,6 +38,11 @@ export function postGeneratePdf(request: functions.Request, response: functions.
         formData.owllyData = owllyData.data();
       }
 
+      const owllyPDF = admin
+        .storage()
+        .bucket()
+        .file(formData.userData.sub + '/' + formData.owllyData + '.pdf', {});
+
       const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
       // Metadata
@@ -49,9 +54,33 @@ export function postGeneratePdf(request: functions.Request, response: functions.
       response.setHeader('Content-disposition', `attachment; filename="${owllyId + '-' + eId}.pdf"`);
       response.setHeader('Content-type', 'application/pdf');
 
-      doc.pipe(response.status(200));
+      //doc.pipe(response.status(200));
+      const stream = doc.pipe(
+        owllyPDF.createWriteStream({
+          contentType: 'application/pdf',
+          metadata: {
+            customMetadata: {
+              //"titel": initiative.titel,
+              //"subtitel": initiative.subtitel,
+              //"text": initiative.text,
+              //"eid": user.sub
+            },
+          },
+        })
+      ); //save to firebase bucket
 
       doc.end();
+      owllyPDF
+        .getSignedUrl({
+          action: 'read',
+          expires: new Date().toISOString().substr(0, 10),
+        })
+        .then((signedUrl) => {
+          response.status(200);
+          return response.json({
+            url: signedUrl[0],
+          });
+        });
     } catch (err) {
       response.status(500).json({
         error: err,
