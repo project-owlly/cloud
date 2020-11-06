@@ -9,9 +9,6 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
   Eid: string;
 }
-interface PDFDataRequest {
-  url: string; // currently owllyId
-}
 
 export async function postGeneratePdf(data: any, context: CallableContext): Promise<any | undefined> {
   const owllyId: string | undefined = data.owllyId;
@@ -38,7 +35,7 @@ export async function postGeneratePdf(data: any, context: CallableContext): Prom
   const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
   //doc.pipe(response.status(200));
-  const stream = doc.pipe(
+  doc.pipe(
     owllyPDF.createWriteStream({
       contentType: 'application/pdf',
       metadata: {
@@ -56,14 +53,15 @@ export async function postGeneratePdf(data: any, context: CallableContext): Prom
 
   doc.end();
 
-  owllyPDF
-    .getSignedUrl({
-      action: 'read',
-      expires: new Date().toISOString().substr(0, 10),
-    })
-    .then((signedUrl) => {
-      return {
-        url: signedUrl[0],
-      };
-    });
+  const newDate = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+  const expDate = newDate.substr(8, 2) + '-' + newDate.substr(5, 2) + '-' + newDate.substr(0, 4);
+  console.log(expDate);
+  const signedURL = await owllyPDF.getSignedUrl({
+    action: 'read',
+    expires: Date.now() + 1000 * 60 * 60 * 10, // always a valid date now
+    responseType: 'application/pdf',
+  });
+  return {
+    url: signedURL[0],
+  };
 }
