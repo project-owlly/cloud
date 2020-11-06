@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import {CallableContext} from 'firebase-functions/lib/providers/https';
 
 import {configuration} from './../../config/oidc/schaffhausen';
 
@@ -14,7 +15,7 @@ interface OidAuthDataRequest {
   state: string; // currently owllyId
 }
 
-export async function callOIDAuthUrl(data: OidAuthDataRequest, context: functions.EventContext): Promise<OidAuth | undefined> {
+export async function callOIDAuthUrl(data: OidAuthDataRequest, context: CallableContext): Promise<OidAuth | undefined> {
   const state: string | undefined = data.state;
 
   if (!state) {
