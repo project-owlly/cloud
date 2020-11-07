@@ -10,7 +10,10 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   Eid: string;
 }
 
-export async function postGeneratePdf(data: any, context: CallableContext): Promise<any | undefined> {
+export async function callGeneratePdfUrl(data: any, context: CallableContext): Promise<any | undefined> {
+  console.log('data ' + JSON.stringify(data));
+  console.log('context ' + JSON.stringify(context.rawRequest.body));
+
   const owllyId: string | undefined = data.owllyId;
   const eId: string = data.userData.sub;
 
@@ -24,7 +27,7 @@ export async function postGeneratePdf(data: any, context: CallableContext): Prom
   const owllyData = await db.collection('owlly').doc(owllyId).get();
   if (owllyData.exists) {
     //für testformular auf owllywebsite
-    formData.owllyData = owllyData.data();
+    formData['owllyData'] = owllyData.data();
   }
 
   const owllyPDF = admin
