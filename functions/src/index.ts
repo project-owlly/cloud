@@ -9,7 +9,7 @@ import {callOIDAuthUrl} from './request/oidc/getOIDC';
 import {getEidData} from './request/oidc/getEidData';
 
 import {callOIDAuthUrlLogin} from './request/oidc/getOIDCLogin';
-import {callEidLogin} from './request/oidc/loginEid';
+import {callEidLogin} from './request/oidc/getEidLogin';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
