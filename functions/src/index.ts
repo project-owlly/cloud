@@ -7,7 +7,6 @@ import {callGeneratePdfUrl} from './request/pdf/pdf.call';
 
 import {callOIDAuthUrl} from './request/oidc/getOIDC';
 import {getEidData} from './request/oidc/getEidData';
-import {callEidLogin} from './request/oidc/loginEid';
 
 import {callOIDAuthUrlLogin} from './request/oidc/getOIDCLogin';
 import {callEidLogin} from './request/oidc/loginEid';
