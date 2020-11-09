@@ -5,8 +5,8 @@ import {configuration} from './../../config/oidc/schaffhausen';
 import * as axios from 'axios';
 import * as FormData from 'form-data';
 
-import * as admin from 'firebase-admin';
-admin.initializeApp(functions.config().firebase);
+//import * as admin from 'firebase-admin';
+//admin.initializeApp(functions.config().firebase);
 
 export async function callEidLogin(data: any, context: CallableContext): Promise<any | undefined> {
   const authCode = data.authorization_code;
@@ -32,7 +32,7 @@ export async function callEidLogin(data: any, context: CallableContext): Promise
       };
     });
 
-  let userData: any = await axios.default
+  /*let userData: any = await axios.default
     .get(configuration.userinfo_endpoint, {
       headers: {
         Authorization: 'Bearer ' + tokenData.data.access_token,
@@ -43,11 +43,11 @@ export async function callEidLogin(data: any, context: CallableContext): Promise
         error: error.message,
         fullerror: JSON.stringify(error),
       };
-    });
+    });*/
 
-  const userToken = await admin.auth().createCustomToken(userData.data.sub);
+  //const userToken = await admin.auth().createCustomToken(userData.data.sub);
   return {
-    userToken: userToken,
+    //  userToken: userToken,
     idToken: tokenData.data.id_token,
   };
 }
