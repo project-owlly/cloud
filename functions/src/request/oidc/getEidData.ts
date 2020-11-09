@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
-import {CallableContext} from 'firebase-functions/lib/providers/https';
-
+import * as axios from 'axios';
+import * as FormData from 'form-data';
+import * as cors from 'cors';
 import {configuration} from './../../config/oidc/schaffhausen';
 
 export async function getEidData(request: functions.Request, response: functions.Response<any>) {
