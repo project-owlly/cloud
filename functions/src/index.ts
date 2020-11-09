@@ -4,8 +4,10 @@ import 'firebase-functions/lib/logger/compat';
 import {getOwlly} from './request/owlly/owlly.get';
 import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './request/pdf/pdf.call';
+
 import {callOIDAuthUrl} from './request/oidc/getOIDC';
 import {getEidData} from './request/oidc/getEidData';
+import {callEidLogin} from './request/oidc/loginEid';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
@@ -27,3 +29,4 @@ export const feedbackThankyouEmail = functions.region('europe-west6').firestore.
 //onCall
 export const OIDAuthUrl = functions.region('europe-west6').https.onCall(callOIDAuthUrl);
 export const generatePDF = functions.region('europe-west6').https.onCall(callGeneratePdfUrl);
+export const eidLogin = functions.region('europe-west6').https.onCall(callEidLogin);
