@@ -11,8 +11,8 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
 }
 
 export async function callGeneratePdfUrl(data: any, context: CallableContext): Promise<any | undefined> {
-  console.log('data ' + JSON.stringify(data));
-  console.log('context ' + JSON.stringify(context.rawRequest.body));
+  //console.log("data " + JSON.stringify(data));
+  //console.log("context " + JSON.stringify(context.rawRequest.body));
 
   const owllyId: string | undefined = data.owllyId;
   const eId: string = data.userData.sub;
@@ -33,7 +33,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   const owllyPDF = admin
     .storage()
     .bucket()
-    .file(formData.userData.sub + '/' + formData.owllyData + '.pdf', {});
+    .file(data.owllyId + '/' + data.userData.sub + '.pdf', {});
 
   const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
@@ -62,7 +62,8 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   const signedURL = await owllyPDF.getSignedUrl({
     action: 'read',
     expires: Date.now() + 1000 * 60 * 60 * 10, // always a valid date now
-    responseType: 'application/pdf',
+    //responseType: 'application/pdf',
+    //contentType: 'application/pdf',
   });
   return {
     url: signedURL[0],
