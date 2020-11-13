@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 
-import {configuration} from './../../config/oidc/schaffhausen';
+import {configuration} from '../../config/oidc/schaffhausen';
 
 /*** ISSUER ***/
 import {Issuer} from 'openid-client';

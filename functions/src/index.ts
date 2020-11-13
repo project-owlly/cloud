@@ -3,12 +3,12 @@ import 'firebase-functions/lib/logger/compat';
 
 import {getOwlly} from './request/owlly/owlly.get';
 import {mailboxGet} from './request/mailbox/mailbox.get';
-import {callGeneratePdfUrl} from './request/pdf/pdf.call';
+import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
-import {callOIDAuthUrl, callOIDAuthUrlLogin} from './request/oidc/oidc.call';
-import {getEidData} from './request/oidc/getEidData';
+import {callOIDAuthUrl, callOIDAuthUrlLogin} from './call/oidc/oidc.call';
+import {getEidData} from './call/oidc/getEidData';
 
-import {callEidLogin} from './request/oidc/getEidLogin';
+import {callEidLogin} from './call/oidc/getEidLogin';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
