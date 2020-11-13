@@ -6,7 +6,7 @@ import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
 import {callOIDAuthUrl, callOIDAuthUrlLogin} from './call/oidc/oidc.call';
-import {getEidData} from './call/eid/getEidData';
+import {getEidData} from './request/eid/getEidData';
 
 import {callEidLogin} from './call/eid/getEidLogin';
 
