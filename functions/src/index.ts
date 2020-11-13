@@ -6,9 +6,9 @@ import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
 import {callOIDAuthUrl, callOIDAuthUrlLogin} from './call/oidc/oidc.call';
-import {getEidData} from './call/oidc/getEidData';
+import {getEidData} from './call/eid/getEidData';
 
-import {callEidLogin} from './call/oidc/getEidLogin';
+import {callEidLogin} from './call/eid/getEidLogin';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
