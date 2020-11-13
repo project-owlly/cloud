@@ -8,7 +8,7 @@ import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 import {callOIDAuthUrl, callOIDAuthUrlLogin} from './call/oidc/oidc.call';
 import {getEidData} from './request/eid/getEidData';
 
-import {callEidLogin} from './call/eid/getEidLogin';
+import {callEidLogin} from './call/eid/eid.call';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
