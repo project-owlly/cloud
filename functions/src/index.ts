@@ -6,9 +6,8 @@ import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
 import {callOIDAuthUrl, callOIDAuthUrlLogin} from './call/oidc/oidc.call';
-import {getEidData} from './request/eid/getEidData';
 
-import {callEidLogin} from './call/eid/eid.call';
+import {callEidData, callEidLogin} from './call/eid/eid.call';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 
@@ -18,7 +17,6 @@ import {sendFeedbackThankYouMail} from './firestore/feedback/feedback.create';
 // HTTP Requests (EXTERNAL) - Internal = from App should be onCall..
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
 export const mailbox = functions.region('europe-west6').https.onRequest(mailboxGet);
-export const eidData = functions.region('europe-west6').https.onRequest(getEidData); //could be "onCall" for callable functions
 
 // scheduler (Mailbox, Cleanup Documents)
 export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 15 minutes').onRun(readMailbox);
@@ -34,3 +32,6 @@ export const generatePDF = functions.region('europe-west6').https.onCall(callGen
 // onCall eID+ Login
 export const OIDAuthUrlLogin = functions.region('europe-west6').https.onCall(callOIDAuthUrlLogin);
 export const eidLogin = functions.region('europe-west6').https.onCall(callEidLogin);
+
+// onCall eID+ user data
+export const eidData = functions.region('europe-west6').https.onCall(callEidData);
