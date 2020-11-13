@@ -6,8 +6,11 @@ import {configuration} from '../../config/oidc/schaffhausen';
 import * as axios from 'axios';
 import * as FormData from 'form-data';
 
+interface EidUserData {}
+
 interface EidLogin {
   id_token: string;
+  access_token: string;
 }
 
 interface EidDataRequest {
@@ -15,10 +18,26 @@ interface EidDataRequest {
 }
 
 export async function callEidLogin(data: EidDataRequest, context: CallableContext): Promise<string | undefined> {
-  return await postEidLogin(data);
+  const eidToken: EidLogin | undefined = await postEidLogin(data);
+
+  if (!eidToken) {
+    return undefined;
+  }
+
+  return eidToken.id_token;
 }
 
-async function postEidLogin(data: EidDataRequest): Promise<string | undefined> {
+export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
+  const eidToken: EidLogin | undefined = await postEidLogin(data);
+
+  if (!eidToken) {
+    return undefined;
+  }
+
+  return await getEidUserData(eidToken.access_token);
+}
+
+async function postEidLogin(data: EidDataRequest): Promise<EidLogin | undefined> {
   const form = new FormData();
   form.append('code', data.authorization_code);
   form.append('grant_type', 'authorization_code');
@@ -32,7 +51,22 @@ async function postEidLogin(data: EidDataRequest): Promise<string | undefined> {
       },
     });
 
-    return tokenData.data.id_token;
+    return tokenData.data;
+  } catch (err) {
+    console.error(err);
+    return undefined;
+  }
+}
+
+async function getEidUserData(accessToken: string): Promise<EidUserData | undefined> {
+  try {
+    const userData: axios.AxiosResponse<EidUserData> = await axios.default.get(configuration.userinfo_endpoint, {
+      headers: {
+        Authorization: 'Bearer ' + accessToken,
+      },
+    });
+
+    return userData.data;
   } catch (err) {
     console.error(err);
     return undefined;
