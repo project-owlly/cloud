@@ -5,10 +5,9 @@ import {getOwlly} from './request/owlly/owlly.get';
 import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './request/pdf/pdf.call';
 
-import {callOIDAuthUrl} from './request/oidc/getOIDC';
+import {callOIDAuthUrl, callOIDAuthUrlLogin} from './request/oidc/oidc.call';
 import {getEidData} from './request/oidc/getEidData';
 
-import {callOIDAuthUrlLogin} from './request/oidc/getOIDCLogin';
 import {callEidLogin} from './request/oidc/getEidLogin';
 
 import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';

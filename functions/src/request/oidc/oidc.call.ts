@@ -15,6 +15,20 @@ interface OidAuthDataRequest {
   state: string; // currently owllyId
 }
 
+export async function callOIDAuthUrlLogin(data: OidAuthDataRequest, context: CallableContext): Promise<OidAuth | undefined> {
+  const state: string | undefined = data.state;
+
+  if (!state) {
+    return undefined;
+  }
+
+  const scope: string = 'openid verified_simple';
+
+  const oidAuth = await generateOIDAuthUrl(state, scope);
+
+  return oidAuth;
+}
+
 export async function callOIDAuthUrl(data: OidAuthDataRequest, context: CallableContext): Promise<OidAuth | undefined> {
   const state: string | undefined = data.state;
 
@@ -22,7 +36,9 @@ export async function callOIDAuthUrl(data: OidAuthDataRequest, context: Callable
     return undefined;
   }
 
-  const oidAuth = await generateOIDAuthUrl(state);
+  const scope: string = 'openid given_name family_name birth_date street_address postal_code locality verified_simple';
+
+  const oidAuth = await generateOIDAuthUrl(state, scope);
 
   return oidAuth;
 }
@@ -30,7 +46,7 @@ export async function callOIDAuthUrl(data: OidAuthDataRequest, context: Callable
 /******************************************************************/
 //   E I D  /  O I D C  -  S T U F F
 /******************************************************************/
-export async function generateOIDAuthUrl(state: string | undefined): Promise<OidAuth> {
+export async function generateOIDAuthUrl(state: string | undefined, scope: string): Promise<OidAuth> {
   //change autodiscovery based on REQUEST.PARAM
 
   //autodiscovery, if system changes
@@ -42,8 +58,6 @@ export async function generateOIDAuthUrl(state: string | undefined): Promise<Oid
     client_secret: functions.config().oidc.pwd,
     redirect_uris: [configuration.redirect_uri_app, configuration.redirect_uri_prod, configuration.redirect_uri_dev],
   }); // => Client /////, [keystore]
-
-  const scope = 'openid given_name family_name birth_date street_address postal_code locality verified_simple';
 
   const redirect_uri = configuration.redirect_uri_prod;
 
