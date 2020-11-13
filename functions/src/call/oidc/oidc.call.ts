@@ -6,28 +6,36 @@ import {configuration} from '../../config/oidc/schaffhausen';
 /*** ISSUER ***/
 import {Issuer} from 'openid-client';
 
-interface OidAuth {
+interface OidcAuth {
   url: string;
+  type: 'login' | 'wizard';
   owllyId?: string;
 }
 
-interface OidAuthDataRequest {
+interface OidcAuthDataRequest {
   owllyId?: string;
 }
 
-interface OidAuthLoginDataRequest {}
+interface OidcAuthLoginDataRequest {}
 
-export async function callOIDAuthUrlLogin(_data: OidAuthLoginDataRequest, context: CallableContext): Promise<OidAuth | undefined> {
+interface OidcState {
+  type: 'login' | 'wizard';
+  owllyId?: string;
+}
+
+export async function callOidcAuthUrlLogin(_data: OidcAuthLoginDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
   const scope: string = 'openid verified_simple';
 
-  const oidAuth: Partial<OidAuth> = await generateOIDAuthUrl(scope);
+  const oidAuth: Partial<OidcAuth> = await generateOidcAuthUrl(scope, {
+    type: 'login',
+  });
 
   return {
     ...oidAuth,
-  } as OidAuth;
+  } as OidcAuth;
 }
 
-export async function callOIDAuthUrl(data: OidAuthDataRequest, context: CallableContext): Promise<OidAuth | undefined> {
+export async function callOidcAuthUrl(data: OidcAuthDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
   const owllyId: string | undefined = data.owllyId;
 
   if (!owllyId) {
@@ -36,18 +44,21 @@ export async function callOIDAuthUrl(data: OidAuthDataRequest, context: Callable
 
   const scope: string = 'openid given_name family_name birth_date street_address postal_code locality verified_simple';
 
-  const oidAuth = await generateOIDAuthUrl(scope, owllyId);
+  const oidAuth = await generateOidcAuthUrl(scope, {
+    type: 'wizard',
+    owllyId,
+  });
 
   return {
     ...oidAuth,
     owllyId,
-  } as OidAuth;
+  } as OidcAuth;
 }
 
 /******************************************************************/
 //   E I D  /  O I D C  -  S T U F F
 /******************************************************************/
-export async function generateOIDAuthUrl(scope: string, state?: string): Promise<Partial<OidAuth>> {
+export async function generateOidcAuthUrl(scope: string, state: OidcState): Promise<Partial<OidcAuth>> {
   //change autodiscovery based on REQUEST.PARAM
 
   //autodiscovery, if system changes
@@ -63,7 +74,7 @@ export async function generateOIDAuthUrl(scope: string, state?: string): Promise
   const redirect_uri = configuration.redirect_uri_prod;
 
   const authorizationUrl = client.authorizationUrl({
-    ...(state && {state}),
+    ...state,
     redirect_uri: redirect_uri,
     scope: scope,
   });
@@ -76,5 +87,6 @@ export async function generateOIDAuthUrl(scope: string, state?: string): Promise
 
   return {
     url: authorizationUrl,
+    type: state.type,
   };
 }

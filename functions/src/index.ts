@@ -5,7 +5,7 @@ import {getOwlly} from './request/owlly/owlly.get';
 import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
-import {callOIDAuthUrl, callOIDAuthUrlLogin} from './call/oidc/oidc.call';
+import {callOidcAuthUrl, callOidcAuthUrlLogin} from './call/oidc/oidc.call';
 
 import {callEidData, callEidLogin} from './call/eid/eid.call';
 
@@ -26,11 +26,11 @@ export const newsletterWelcomeEmail = functions.region('europe-west6').firestore
 export const feedbackThankyouEmail = functions.region('europe-west6').firestore.document('/feedback/{id}').onCreate(sendFeedbackThankYouMail);
 
 // onCall +eid Data for PDF
-export const OIDAuthUrl = functions.region('europe-west6').https.onCall(callOIDAuthUrl);
+export const OIDAuthUrl = functions.region('europe-west6').https.onCall(callOidcAuthUrl);
 export const generatePDF = functions.region('europe-west6').https.onCall(callGeneratePdfUrl);
 
 // onCall eID+ Login
-export const OIDAuthUrlLogin = functions.region('europe-west6').https.onCall(callOIDAuthUrlLogin);
+export const OIDAuthUrlLogin = functions.region('europe-west6').https.onCall(callOidcAuthUrlLogin);
 export const eidLogin = functions.region('europe-west6').https.onCall(callEidLogin);
 
 // onCall eID+ user data
