@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import {CallableContext} from 'firebase-functions/lib/providers/https';
-import {configuration} from './../../config/oidc/schaffhausen';
+import {configuration} from '../../config/oidc/schaffhausen';
 
 import * as axios from 'axios';
 import * as FormData from 'form-data';
