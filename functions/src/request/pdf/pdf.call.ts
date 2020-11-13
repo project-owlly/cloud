@@ -54,7 +54,8 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
   (doc.info as OwllyDocumentInfo).Eid = eId;
 
-  doc.end();
+  doc.info.Producer = 'Owlly';
+  doc.info.Creator = 'Owlly';
 
   const newDate = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
   const expDate = newDate.substr(8, 2) + '-' + newDate.substr(5, 2) + '-' + newDate.substr(0, 4);
