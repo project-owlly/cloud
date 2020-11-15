@@ -86,7 +86,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Beginn der Referendumsfrist am ' + ' ' + format(new Date(), 'MM.dd.yyyy'), 0, 95, {
+      .text('Beginn der Referendumsfrist am ' + ' ' + format(new Date(), 'dd.MM.yyyy'), 0, 95, {
         align: 'center',
       });
   } else if (data.owllyData.type === 'initiative') {
@@ -94,7 +94,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Veröffentlicht am ' + ' ' + format(new Date(), 'MM.dd.yyyy'), 0, 95, {
+      .text('Veröffentlicht am ' + ' ' + format(new Date(), 'dd.MM.yyyy'), 0, 95, {
         align: 'center',
       });
   }
@@ -128,7 +128,7 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
 
   doc.rotate(-15);
 
-  doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'MM.dd.yyyy'), 416, 328, {
+  doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'dd.MM.yyyy'), 416, 328, {
     align: 'left',
   });
 
@@ -206,11 +206,11 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 515, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Hinweis strafbar', 45, 515, {
     align: 'left',
   });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Text', 45, 550, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Wortlaut des Begehrens', 45, 550, {
     align: 'left',
   });
 
@@ -218,7 +218,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text('Urheber', 45, 575 + doc.heightOfString('urheber'), {
+    .text('Urheber', 45, 575 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
     });
 
@@ -254,7 +254,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(data.owllyData.author, 45, 585 + doc.heightOfString(data.owllyData.author), {
+    .text(data.owllyData.author, 45, 585 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
       width: doc.page.width - 90,
     });
