@@ -33,7 +33,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   const owllyPDF = admin
     .storage()
     .bucket()
-    .file(data.owllyId + '/' + data.userData.sub + '.pdf', {});
+    .file('owlly/' + data.owllyId + '/' + data.userData.postal_code + '/' + data.userData.sub + '/' + data.owllyData.filename + '.pdf', {});
 
   const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
@@ -57,9 +57,8 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   doc.info.Producer = 'Owlly';
   doc.info.Creator = 'Owlly';
 
-  const newDate = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
-  const expDate = newDate.substr(8, 2) + '-' + newDate.substr(5, 2) + '-' + newDate.substr(0, 4);
-  console.log(expDate);
+  doc.end();
+
   const signedURL = await owllyPDF.getSignedUrl({
     action: 'read',
     expires: Date.now() + 1000 * 60 * 60 * 10, // always a valid date now

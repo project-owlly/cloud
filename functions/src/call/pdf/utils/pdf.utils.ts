@@ -79,12 +79,14 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
     align: 'center',
   });
 
+  console.log(data.owllyData.published);
+
   if (data.owllyData.type === 'referendum') {
     doc
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Beginn der Referendumsfrist am ' + ' ' + data.owllyData.published + ' im Bundesblatt veröffentlicht.', 0, 95, {
+      .text('Beginn der Referendumsfrist am ' + ' ' + format(new Date(), 'MM.dd.yyyy'), 0, 95, {
         align: 'center',
       });
   } else if (data.owllyData.type === 'initiative') {
@@ -92,7 +94,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Im Bundesblatt veröffentlicht am ' + ' ' + data.owllyData.published, 0, 95, {
+      .text('Veröffentlicht am ' + ' ' + format(new Date(), 'MM.dd.yyyy'), 0, 95, {
         align: 'center',
       });
   }
@@ -101,7 +103,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
 function generatePDFKantonLogo(doc: PDFKit.PDFDocument, data: any) {
   doc.lineCap('butt').lineWidth(7).moveTo(0, 150).lineTo(712, 150).stroke('#FEBF15');
 
-  if (data.owllyData.level === 'canton') {
+  if (data.owllyData.ruleName === 'canton') {
     doc.image(`${process.cwd()}/assets/flags/` + String(data.owllyData.ruleValue).toUpperCase() + `.png`, (doc.page.width - 162 / 4) / 2, 130, {
       scale: 0.25,
     });
@@ -204,20 +206,11 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
-  doc
-    .fillColor('#a6a8aa')
-    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
-    .text(
-      'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
-      45,
-      515,
-      {
-        align: 'left',
-      }
-    );
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 515, {
+    align: 'left',
+  });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text(data.owllyData.text, 45, 550, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Text', 45, 550, {
     align: 'left',
   });
 
@@ -225,7 +218,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text('Name und Adresse des Urhebers oder Urheber der Initiative (Initiativkomitee)', 45, 575 + doc.heightOfString(data.owllyData.author), {
+    .text('Urheber', 45, 575 + doc.heightOfString('urheber'), {
       align: 'left',
     });
 
@@ -261,7 +254,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(data.owllyData.author, 45, 585 + doc.heightOfString(data.owllyData.text), {
+    .text(data.owllyData.author, 45, 585 + doc.heightOfString(data.owllyData.author), {
       align: 'left',
       width: doc.page.width - 90,
     });
@@ -299,7 +292,7 @@ function generatePDFUserDaten(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(30)
-    .text(data.userData.given_name + ' ' + data.userData.family_name, 0, 255, {
+    .text(data.userData.given_name + ', ' + data.userData.family_name, 0, 255, {
       align: 'center',
     });
 
@@ -315,7 +308,12 @@ function generatePDFUserDaten(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(16)
-    .text(data.userData.street_address, (doc.page.width - 200 + doc.widthOfString(data.userData.street_address)) / 2, 325, {
-      align: 'left',
-    });
+    .text(
+      data.userData.street_address + ', ' + data.userData.postal_code + ' ' + data.userData.locality,
+      (doc.page.width - 200 + doc.widthOfString(data.userData.street_address + ', ' + data.userData.postal_code + ' ' + data.userData.locality)) / 2,
+      325,
+      {
+        align: 'left',
+      }
+    );
 }
