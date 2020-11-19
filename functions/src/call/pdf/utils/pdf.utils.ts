@@ -128,11 +128,11 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
   });
 
   doc.rotate(-15);
-
+  
   doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'dd.MM.yyyy'), 416, 328, {
     align: 'left',
   });
-
+//TODO: fix time with regard to swiss timezone
   doc
     .fillColor('#929496')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
