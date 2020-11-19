@@ -1,6 +1,7 @@
 import * as PDFDocument from 'pdfkit';
 import {format} from 'date-fns';
-//import { Timestamp } from '@google-cloud/firestore';
+
+const {formatToTimeZone } = require('date-fns-timezone')
 
 export async function generatePDFDoc(data: any): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
@@ -132,12 +133,12 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
   doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'dd.MM.yyyy'), 416, 328, {
     align: 'left',
   });
-//TODO: fix time with regard to swiss timezone
+
   doc
     .fillColor('#929496')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(new Date().getHours()+1 + ':' + new Date().getMinutes() + ' Uhr', 438, 348, {
+    .text(formatToTimeZone(new Date(),'HH:mm',{timeZone: 'Europe/Berlin'}  ) + ' Uhr', 438, 348, {
       align: 'left',
     });
 
