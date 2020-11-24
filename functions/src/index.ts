@@ -19,7 +19,7 @@ export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
 export const mailbox = functions.region('europe-west6').https.onRequest(mailboxGet);
 
 // scheduler (Mailbox, Cleanup Documents)
-export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 15 minutes').onRun(readMailbox);
+export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 30 minutes').onRun(readMailbox);
 
 // FIRESTORE DATABASE Listener
 export const newsletterWelcomeEmail = functions.region('europe-west6').firestore.document('/newsletter/{id}').onCreate(sendNewsletterWelcomeMail);
