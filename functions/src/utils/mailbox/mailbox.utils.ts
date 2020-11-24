@@ -8,6 +8,8 @@ import {PDFDocumentProxy, PDFInfo, PDFLoadingTask, PDFMetadata} from 'pdfjs-dist
 import {promises as fs} from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import {getSignatures} from './parser.utils';
+import {checkRevocation} from './revocation.utils';
 
 /* MAILBOX */
 const config = {
@@ -27,13 +29,26 @@ interface MailData {
 }
 
 export async function readMailboxPdfs(): Promise<string[]> {
-  const data: MailData[] | null = await readMailbox();
+  const attachments: MailData[] | null = await readMailbox();
 
-  if (!data || data.length <= 0) {
+  if (!attachments || attachments.length <= 0) {
     return [];
   }
 
-  const owllyIds: string[] = await readPdfOwllyIds(data);
+  for (const attachement of attachments) {
+    const signatures = getSignatures(attachement.data);
+    if (signatures.length >= 1) {
+      console.log('>>>>> signature ok');
+      console.log(JSON.stringify(signatures[0]));
+
+      const signature = await checkRevocation(signatures[0]);
+      console.log(signature);
+    } else {
+      console.log('>>>>> signature NOT ok');
+    }
+  }
+
+  const owllyIds: string[] = await readPdfOwllyIds(attachments);
 
   return owllyIds;
 }
@@ -43,8 +58,8 @@ async function readMailbox(): Promise<MailData[] | null> {
 
   await connection.openBox('INBOX');
 
-  // Fetch emails from the last 24h
-  const delay = 24 * 3600 * 1000;
+  // Fetch emails from the last 30min
+  const delay = 30 * 60 * 1000; // 24 * 60 * 60 *1000
   const yesterday = new Date();
   yesterday.setTime(Date.now() - delay);
   const yesterday2 = yesterday.toISOString();
@@ -122,8 +137,8 @@ async function readPdfOwllyId(data: MailData): Promise<string | null> {
   return await extractOwllyId(pdf);
 }
 
-async function readPdfOwllyIds(data: MailData[]): Promise<string[]> {
-  const owllyIds: (string | null)[] = await Promise.all(data.map((d: MailData) => readPdfOwllyId(d)));
+async function readPdfOwllyIds(attachments: MailData[]): Promise<string[]> {
+  const owllyIds: (string | null)[] = await Promise.all(attachments.map((d: MailData) => readPdfOwllyId(d)));
 
   if (!owllyIds || owllyIds.length <= 0) {
     return [];
