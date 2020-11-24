@@ -1,6 +1,8 @@
 import * as PDFDocument from 'pdfkit';
 import {format} from 'date-fns';
 
+const {formatToTimeZone} = require('date-fns-timezone');
+
 export async function generatePDFDoc(data: any): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
     size: 'A4',
@@ -79,12 +81,14 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
     align: 'center',
   });
 
+  console.log(data.owllyData.published);
+
   if (data.owllyData.type === 'referendum') {
     doc
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Beginn der Referendumsfrist am ' + ' ' + data.owllyData.published + ' im Bundesblatt veröffentlicht.', 0, 95, {
+      .text('Beginn der Referendumsfrist am ' + ' ' + format(new Date(data.owllyData.published._seconds * 1000), 'dd.MM.yyyy'), 0, 95, {
         align: 'center',
       });
   } else if (data.owllyData.type === 'initiative') {
@@ -92,7 +96,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Im Bundesblatt veröffentlicht am ' + ' ' + data.owllyData.published, 0, 95, {
+      .text('Veröffentlicht am ' + ' ' + format(new Date(data.owllyData.published._seconds * 1000), 'dd.MM.yyyy'), 0, 95, {
         align: 'center',
       });
   }
@@ -101,7 +105,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
 function generatePDFKantonLogo(doc: PDFKit.PDFDocument, data: any) {
   doc.lineCap('butt').lineWidth(7).moveTo(0, 150).lineTo(712, 150).stroke('#FEBF15');
 
-  if (data.owllyData.level === 'canton') {
+  if (data.owllyData.ruleName === 'canton') {
     doc.image(`${process.cwd()}/assets/flags/` + String(data.owllyData.ruleValue).toUpperCase() + `.png`, (doc.page.width - 162 / 4) / 2, 130, {
       scale: 0.25,
     });
@@ -126,7 +130,7 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
 
   doc.rotate(-15);
 
-  doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'MM.dd.yyyy'), 416, 328, {
+  doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'dd.MM.yyyy'), 416, 328, {
     align: 'left',
   });
 
@@ -134,7 +138,7 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
     .fillColor('#929496')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(format(new Date(), 'HH:mm') + ' Uhr', 438, 348, {
+    .text(formatToTimeZone(new Date(), 'HH:mm', {timeZone: 'Europe/Berlin'}) + ' Uhr', 438, 348, {
       align: 'left',
     });
 
@@ -196,11 +200,11 @@ function generatePDFLine(doc: PDFKit.PDFDocument) {
 function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
   doc.rect(35, 510, doc.page.width - 70, 30).fill('#f1f1f1');
 
-  doc.rect(35, 545, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 20).fill('#f1f1f1');
+  doc.rect(35, 545, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 30).fill('#f1f1f1');
 
-  doc.rect(35, 570 + doc.heightOfString(data.owllyData.text), doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1');
+  doc.rect(35, 570 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1');
 
-  doc.rect(35, 745, doc.page.width - 70, 30).fill('#f1f1f1');
+  doc.rect(35, 745, doc.page.width - 70, 40).fill('#f1f1f1');
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
@@ -214,28 +218,29 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
       515,
       {
         align: 'left',
+        width: doc.page.width - 90,
       }
     );
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text(data.owllyData.text, 45, 550, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(8).text('Wortlaut des Begehrens', 45, 550, {
     align: 'left',
   });
 
   doc
     .fillColor('#a6a8aa')
-    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
+    .font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`)
     .fontSize(8)
-    .text('Name und Adresse des Urhebers oder Urheber der Initiative (Initiativkomitee)', 45, 575 + doc.heightOfString(data.owllyData.author), {
+    .text('Urheber', 45, 575 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
     });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {
     align: 'left',
   });
 }
 
 function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
-  doc
+  /*doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
@@ -246,7 +251,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
       {
         align: 'left',
       }
-    );
+    );*/
 
   doc
     .fillColor('#a6a8aa')
@@ -261,7 +266,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(data.owllyData.author, 45, 585 + doc.heightOfString(data.owllyData.text), {
+    .text(data.owllyData.author, 45, 595 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
       width: doc.page.width - 90,
     });
@@ -273,11 +278,12 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
       .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
       .fontSize(8)
       .text(
-        'Das Initiativkomitee, bestehend aus nachstehenden Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
+        'Das Initiativkomitee, bestehend aus den genannten Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
         45,
         760,
         {
           align: 'left',
+          width: doc.page.width - 90,
         }
       );
   }
@@ -299,7 +305,7 @@ function generatePDFUserDaten(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(30)
-    .text(data.userData.given_name + ' ' + data.userData.family_name, 0, 255, {
+    .text(data.userData.given_name + ', ' + data.userData.family_name, 0, 255, {
       align: 'center',
     });
 
@@ -315,7 +321,12 @@ function generatePDFUserDaten(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/JustAnotherHand-Regular.ttf`)
     .fontSize(16)
-    .text(data.userData.street_address, (doc.page.width - 200 + doc.widthOfString(data.userData.street_address)) / 2, 325, {
-      align: 'left',
-    });
+    .text(
+      data.userData.street_address + ', ' + data.userData.postal_code + ' ' + data.userData.locality,
+      (doc.page.width - 200 + doc.widthOfString(data.userData.street_address + ', ' + data.userData.postal_code + ' ' + data.userData.locality)) / 2,
+      325,
+      {
+        align: 'left',
+      }
+    );
 }
