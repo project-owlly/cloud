@@ -1,7 +1,7 @@
 import * as PDFDocument from 'pdfkit';
 import {format} from 'date-fns';
 
-const {formatToTimeZone } = require('date-fns-timezone')
+const {formatToTimeZone} = require('date-fns-timezone');
 
 export async function generatePDFDoc(data: any): Promise<PDFKit.PDFDocument> {
   const doc: PDFKit.PDFDocument = new PDFDocument({
@@ -88,7 +88,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Beginn der Referendumsfrist am ' + ' ' + format(new Date(data.owllyData.published._seconds*1000), 'dd.MM.yyyy'), 0, 95, {
+      .text('Beginn der Referendumsfrist am ' + ' ' + format(new Date(data.owllyData.published._seconds * 1000), 'dd.MM.yyyy'), 0, 95, {
         align: 'center',
       });
   } else if (data.owllyData.type === 'initiative') {
@@ -96,7 +96,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
       .fillColor('white')
       .font(`${process.cwd()}/assets/fonts/Lato-Thin.ttf`)
       .fontSize(10)
-      .text('Veröffentlicht am ' + ' ' + format(new Date(data.owllyData.published._seconds*1000), 'dd.MM.yyyy'), 0, 95, {
+      .text('Veröffentlicht am ' + ' ' + format(new Date(data.owllyData.published._seconds * 1000), 'dd.MM.yyyy'), 0, 95, {
         align: 'center',
       });
   }
@@ -129,7 +129,7 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
   });
 
   doc.rotate(-15);
-  
+
   doc.fillColor('#929496').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(16).text(format(new Date(), 'dd.MM.yyyy'), 416, 328, {
     align: 'left',
   });
@@ -138,7 +138,7 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
     .fillColor('#929496')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
     .fontSize(8)
-    .text(formatToTimeZone(new Date(),'HH:mm',{timeZone: 'Europe/Berlin'}  ) + ' Uhr', 438, 348, {
+    .text(formatToTimeZone(new Date(), 'HH:mm', {timeZone: 'Europe/Berlin'}) + ' Uhr', 438, 348, {
       align: 'left',
     });
 
@@ -202,18 +202,25 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
 
   doc.rect(35, 545, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 30).fill('#f1f1f1');
 
-  doc.rect(35, 570 + doc.heightOfString(data.owllyData.text)+10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1');
+  doc.rect(35, 570 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1');
 
   doc.rect(35, 745, doc.page.width - 70, 40).fill('#f1f1f1');
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text(
-    'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
-    45, 515, {
-    align: 'left',
-    width: doc.page.width-90
-  });
+  doc
+    .fillColor('#a6a8aa')
+    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
+    .fontSize(8)
+    .text(
+      'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
+      45,
+      515,
+      {
+        align: 'left',
+        width: doc.page.width - 90,
+      }
+    );
 
   doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(8).text('Wortlaut des Begehrens', 45, 550, {
     align: 'left',
@@ -271,12 +278,12 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
       .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
       .fontSize(8)
       .text(
-        'Das Initiativkomitee, bestehend aus nachstehenden Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
+        'Das Initiativkomitee, bestehend aus den genannten Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
         45,
         760,
         {
           align: 'left',
-          width: doc.page.width-90
+          width: doc.page.width - 90,
         }
       );
   }
