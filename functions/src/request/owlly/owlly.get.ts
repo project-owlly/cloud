@@ -29,8 +29,8 @@ export function getOwlly(request: functions.Request, response: functions.Respons
 
       const results: Owlly[] = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
         return {
-          ...doc.data(),
           id: doc.id,
+          data: doc.data(),
         } as Owlly;
       });
 
