@@ -1,6 +1,9 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
+import DocumentData = admin.firestore.DocumentData;
+import QueryDocumentSnapshot = admin.firestore.QueryDocumentSnapshot;
+
 import * as cors from 'cors';
 
 import {Owlly} from '../../types/owlly';
@@ -10,30 +13,28 @@ admin.initializeApp(functions.config().firebase);
 
 const db = admin.firestore();
 
-export function getOwlly(request: functions.Request, response: functions.Response<Owlly | RequestError>) {
+export function getOwlly(request: functions.Request, response: functions.Response<Owlly[] | RequestError>) {
   const corsHandler = cors({
     origin: true,
   });
 
   corsHandler(request, response, async () => {
     try {
-      let owllyData: any = await db.collection('owlly').doc('vrrYZoolx2XSy23RW63f').get();
+      const snapshot = await db.collection('owlly').get();
 
-      console.log(
-        JSON.stringify({
-          ...owllyData.data(),
-          ...{
-            id: owllyData.id,
-          },
-        })
-      );
+      if (snapshot.empty) {
+        response.json([]);
+        return;
+      }
 
-      response.json({
-        ...owllyData.data(),
-        ...{
-          id: owllyData.id,
-        },
+      const results: Owlly[] = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+        return {
+          ...doc.data(),
+          id: doc.id,
+        } as Owlly;
       });
+
+      response.json(results);
     } catch (err) {
       response.status(500).json({
         error: err,
