@@ -85,24 +85,27 @@ async function readMailbox(): Promise<MailData[] | null> {
   messages.forEach(async (message: imap.Message) => {
     //loop through each e-mail..
     const parts = imap.getParts(message.attributes.struct as any);
-    // attachments = attachments.concat(
+
     let attachment: any = parts
       .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
       .filter((part: any) => {
         const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
         return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
       })
-      .map((part: any) => {
+      .map(async (part: any) => {
         // retrieve the attachments only of the messages with attachments
-        return connection.getPartData(message, part).then(function (partData: any) {
-          return {
-            filename: part.disposition.params.filename,
-            data: partData,
-          };
+        const partData: any = await connection.getPartData(message, part).catch((err) => {
+          console.log(err);
+          return false;
         });
+        return {
+          filename: part.disposition.params.filename,
+          data: partData,
+        };
       });
     // );
 
+    console.log('attachment: ' + attachment);
     const email = message.parts[0].body.from[0].split('<')[1].split('>')[0];
     const from = message.parts[0].body.from[0].split('<')[0];
     console.log('EMAIL: ' + email + ' FROM: ' + from);
@@ -111,8 +114,8 @@ async function readMailbox(): Promise<MailData[] | null> {
       console.log('Attachment: ' + attachment);
       await sendSuccessMail(email, from);
     } else {
-      console.error('error');
-      await sendErrorMail(email, from, 'no Attachment found');
+      console.error('No Attachment found');
+      await sendErrorMail(email, from, 'No Attachment found');
     }
     attachments = attachments.concat(attachment);
   });
