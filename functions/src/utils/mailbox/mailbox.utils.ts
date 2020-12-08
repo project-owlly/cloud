@@ -1,8 +1,10 @@
 import * as functions from 'firebase-functions';
-
+import * as admin from 'firebase-admin';
 import * as imap from 'imap-simple';
 
+const db = admin.firestore();
 const pdfjsLib = require('pdfjs-dist/es5/build/pdf.js');
+
 import {PDFDocumentProxy, PDFInfo, PDFLoadingTask, PDFMetadata} from 'pdfjs-dist';
 
 import {promises as fs} from 'fs';
@@ -56,7 +58,9 @@ export async function readMailboxPdfs(): Promise<string[]> {
 async function readMailbox(): Promise<MailData[] | null> {
   const connection: imap.ImapSimple = await imap.connect(config);
 
-  await connection.openBox('INBOX');
+  await connection.openBox('INBOX').catch((err) => {
+    console.error('Error: ' + err.message);
+  });
 
   // Fetch emails from the last 30min
   const delay = 30 * 60 * 1000; // 24 * 60 * 60 *1000
@@ -64,7 +68,10 @@ async function readMailbox(): Promise<MailData[] | null> {
   yesterday.setTime(Date.now() - delay);
   const yesterday2 = yesterday.toISOString();
   const searchCriteria = ['UNSEEN', ['SINCE', yesterday2]];
-  const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: true};
+  const fetchOptions = {
+    bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
+    struct: true,
+  };
 
   // retrieve only the headers of the messages
   const messages: imap.Message[] = await connection.search(searchCriteria, fetchOptions);
@@ -75,25 +82,39 @@ async function readMailbox(): Promise<MailData[] | null> {
 
   let attachments: Promise<any>[] = [];
 
-  messages.forEach((message: imap.Message) => {
+  messages.forEach(async (message: imap.Message) => {
+    //loop through each e-mail..
     const parts = imap.getParts(message.attributes.struct as any);
-    attachments = attachments.concat(
-      parts
-        .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
-        .filter((part: any) => {
-          const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
-          return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
-        })
-        .map((part: any) => {
-          // retrieve the attachments only of the messages with attachments
-          return connection.getPartData(message, part).then(function (partData: any) {
-            return {
-              filename: part.disposition.params.filename,
-              data: partData,
-            };
-          });
-        })
-    );
+    // attachments = attachments.concat(
+    let attachment: any = parts
+      .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
+      .filter((part: any) => {
+        const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
+        return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
+      })
+      .map((part: any) => {
+        // retrieve the attachments only of the messages with attachments
+        return connection.getPartData(message, part).then(function (partData: any) {
+          return {
+            filename: part.disposition.params.filename,
+            data: partData,
+          };
+        });
+      });
+    // );
+
+    const email = message.parts[0].body.from[0].split('<')[1].split('>')[0];
+    const from = message.parts[0].body.from[0].split('<')[0];
+    console.log('EMAIL: ' + email + ' FROM: ' + from);
+
+    if (attachment && attachment.filename) {
+      console.log('Attachment: ' + attachment);
+      await sendSuccessMail(email, from);
+    } else {
+      console.error('error');
+      await sendErrorMail(email, from, 'no Attachment found');
+    }
+    attachments = attachments.concat(attachment);
   });
 
   if (attachments.length <= 0) {
@@ -109,7 +130,10 @@ function extractOwllyId(pdf: string): Promise<string | null> {
 
     loadingTask.promise.then(
       async (doc) => {
-        const metadata: {info: PDFInfo; metadata: PDFMetadata} = await doc.getMetadata();
+        const metadata: {
+          info: PDFInfo;
+          metadata: PDFMetadata;
+        } = await doc.getMetadata();
 
         const owllyId: string | null =
           metadata && metadata.info && metadata.info.Custom && metadata.info.Custom.OwllyId !== undefined ? metadata.info.Custom.OwllyId : null;
@@ -145,6 +169,31 @@ async function readPdfOwllyIds(attachments: MailData[]): Promise<string[]> {
   }
 
   return owllyIds.filter((owllyId: string | null) => owllyId !== null) as string[];
+}
+
+function sendErrorMail(email: string, name: string, errorMessage: string) {
+  return db.collection('mail').add({
+    to: email,
+    template: {
+      name: 'inboxError',
+      data: {
+        firstName: name,
+        errorMessage: errorMessage,
+      },
+    },
+  });
+}
+
+function sendSuccessMail(email: string, name: string) {
+  return db.collection('mail').add({
+    to: email,
+    template: {
+      name: 'inboxSuccess',
+      data: {
+        firstName: name,
+      },
+    },
+  });
 }
 
 // Test: run locally
