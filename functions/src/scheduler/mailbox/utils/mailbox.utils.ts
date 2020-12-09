@@ -112,7 +112,7 @@ async function readMailbox(): Promise<MailData[] | null> {
         attachments = attachments.concat(attachment);
       } catch (err) {
         console.error('ERROR ATTACHMENT' + JSON.stringify(err.message));
-        sendErrorMail(message.parts[0].body.from[0].split('<')[1].split('>')[0], message.parts[0].body.from[0].split('<')[0], err.message);
+        await sendErrorMail(message.parts[0].body.from[0].split('<')[1].split('>')[0], message.parts[0].body.from[0].split('<')[0], err.message);
       }
     }
 
@@ -177,8 +177,8 @@ async function readPdfOwllyIds(attachments: MailData[]): Promise<string[]> {
   return owllyIds.filter((owllyId: string | null) => owllyId !== null) as string[];
 }
 
-function sendErrorMail(email: string, name: string, errorMessage: string) {
-  return db.collection('mail').add({
+async function sendErrorMail(email: string, name: string, errorMessage: string) {
+  await db.collection('mail').add({
     to: email,
     template: {
       name: 'inboxError',
