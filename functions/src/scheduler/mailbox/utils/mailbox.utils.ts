@@ -71,11 +71,10 @@ async function readMailbox(): Promise<MailData[] | null> {
 
     // Fetch emails from the last 30min
     const delay = 30 * 60 * 1000; // 24 * 60 * 60 *1000
-    const yesterday = new Date();
-    yesterday.setTime(Date.now() - delay);
-    const yesterday2 = yesterday.toISOString();
-    console.log('READ Mail from: ' + yesterday2);
-    const searchCriteria = ['UNSEEN', ['SINCE', yesterday2]];
+    const yesterday = new Date(Date.now() - new Date().getTimezoneOffset() * 60 * 1000 - delay).toISOString();
+
+    console.log('READ Mail from: ' + yesterday);
+    const searchCriteria = ['UNSEEN', ['SINCE', yesterday]];
     const fetchOptions = {
       bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
       struct: true,
@@ -90,7 +89,8 @@ async function readMailbox(): Promise<MailData[] | null> {
 
     let attachments: MailData[] = [];
 
-    messages.forEach(async (message: imap.Message) => {
+    for (const message of messages) {
+      //messages.forEach(async (message: imap.Message) => {
       //loop through each e-mail..
       const parts = imap.getParts(message.attributes.struct as any);
 
@@ -100,6 +100,8 @@ async function readMailbox(): Promise<MailData[] | null> {
           const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
           return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
         });
+
+      console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
 
       const partData: any = await connection.getPartData(message, attachmentPart);
 
@@ -111,7 +113,8 @@ async function readMailbox(): Promise<MailData[] | null> {
       };
 
       attachments = attachments.concat(attachment);
-    });
+      // });
+    }
 
     connection.end();
 
