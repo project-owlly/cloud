@@ -1,5 +1,7 @@
 import {sha256} from 'js-sha256';
-import {Accounts} from 'web3-eth-accounts';
+
+import Accounts from 'web3-eth-accounts';
+
 import {defineMessages} from 'react-intl';
 
 const messages = defineMessages({
