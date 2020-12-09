@@ -1,9 +1,9 @@
 import * as functions from 'firebase-functions';
-//import * as admin from 'firebase-admin';
+import * as admin from 'firebase-admin';
 import * as imap from 'imap-simple';
 //import { format } from 'date-fns';
 
-//const db = admin.firestore();
+const db = admin.firestore();
 const pdfjsLib = require('pdfjs-dist/es5/build/pdf.js');
 
 import {PDFDocumentProxy, PDFInfo, PDFLoadingTask, PDFMetadata} from 'pdfjs-dist';
@@ -112,7 +112,7 @@ async function readMailbox(): Promise<MailData[] | null> {
         attachments = attachments.concat(attachment);
       } catch (err) {
         console.error('ERROR ATTACHMENT' + JSON.stringify(err.message));
-        //Send ERROR Mail?
+        sendErrorMail(message.parts[0].body.from[0].split('<')[1].split('>')[0], message.parts[0].body.from[0].split('<')[0], err.message);
       }
     }
 
@@ -177,7 +177,6 @@ async function readPdfOwllyIds(attachments: MailData[]): Promise<string[]> {
   return owllyIds.filter((owllyId: string | null) => owllyId !== null) as string[];
 }
 
-/*
 function sendErrorMail(email: string, name: string, errorMessage: string) {
   return db.collection('mail').add({
     to: email,
@@ -189,7 +188,7 @@ function sendErrorMail(email: string, name: string, errorMessage: string) {
       },
     },
   });
-}*/
+}
 
 /*function sendSuccessMail(email: string, name: string) {
   return db.collection('mail').add({
