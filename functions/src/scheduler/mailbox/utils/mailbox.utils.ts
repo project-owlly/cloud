@@ -34,28 +34,31 @@ interface MailData {
 }
 
 export async function readMailboxPdfs(): Promise<string[]> {
+  console.log('>>> READ MAILBOX');
+
   const attachments: MailData[] | null = await readMailbox();
 
   if (!attachments || attachments.length <= 0) {
     return [];
   }
 
+  console.log('>>> SIGNATURE');
+
   for (const attachement of attachments) {
     console.log('loop over mails with attachment from: ' + attachement.from + ' email: ' + attachement.email);
-
-    console.log('check signature');
     const signatures = getSignatures(attachement.data);
     if (signatures.length >= 1) {
-      console.log('>>>>> signature ok');
+      console.log('>>> >>> signature ok');
       console.log(JSON.stringify(signatures[0]));
 
       const signature = await checkRevocation(signatures[0]);
       console.log(signature);
     } else {
-      console.log('>>>>> signature NOT ok');
+      console.log('>>> >>> signature NOT ok');
     }
   }
 
+  console.log('>>> OWLLYID ');
   const owllyIds: string[] = await readPdfOwllyIds(attachments);
 
   return owllyIds;
@@ -99,17 +102,22 @@ async function readMailbox(): Promise<MailData[] | null> {
             return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
           });
 
-        console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
-        const partData: any = await connection.getPartData(message, attachmentPart[0]);
+        //console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
+        if (attachmentPart.length <= 0) {
+          // KEIN PDF vorhanden, das den Kriterien entspricht.
+          // TODO: Email senden?
+        } else {
+          const partData: any = await connection.getPartData(message, attachmentPart[0]);
 
-        const attachment: MailData = {
-          filename: attachmentPart[0].disposition.params.filename,
-          data: partData,
-          from: message.parts[0].body.from[0].split('<')[0],
-          email: message.parts[0].body.from[0].split('<')[1].split('>')[0],
-        };
+          const attachment: MailData = {
+            filename: attachmentPart[0].disposition.params.filename,
+            data: partData,
+            from: message.parts[0].body.from[0].split('<')[0],
+            email: message.parts[0].body.from[0].split('<')[1].split('>')[0],
+          };
 
-        attachments = attachments.concat(attachment);
+          attachments = attachments.concat(attachment);
+        }
       } catch (err) {
         console.error('ERROR ATTACHMENT' + JSON.stringify(err.message));
         await sendErrorMail(message.parts[0].body.from[0].split('<')[1].split('>')[0], message.parts[0].body.from[0].split('<')[0], err.message);
