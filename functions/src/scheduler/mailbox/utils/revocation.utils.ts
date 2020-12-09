@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {configuration} from '../../config/oidc/schaffhausen';
+import {configuration} from '../../../config/oidc/schaffhausen';
 import {defineMessages} from 'react-intl';
 
 const messages = defineMessages({

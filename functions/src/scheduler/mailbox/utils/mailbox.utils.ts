@@ -1,8 +1,9 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
+//import * as admin from 'firebase-admin';
 import * as imap from 'imap-simple';
+//import { format } from 'date-fns';
 
-const db = admin.firestore();
+//const db = admin.firestore();
 const pdfjsLib = require('pdfjs-dist/es5/build/pdf.js');
 
 import {PDFDocumentProxy, PDFInfo, PDFLoadingTask, PDFMetadata} from 'pdfjs-dist';
@@ -28,6 +29,8 @@ const config = {
 interface MailData {
   filename: string;
   data: Buffer;
+  from: string;
+  email: string;
 }
 
 export async function readMailboxPdfs(): Promise<string[]> {
@@ -38,6 +41,9 @@ export async function readMailboxPdfs(): Promise<string[]> {
   }
 
   for (const attachement of attachments) {
+    console.log('loop over mails with attachment from: ' + attachement.from + ' email: ' + attachement.email);
+
+    console.log('check signature');
     const signatures = getSignatures(attachement.data);
     if (signatures.length >= 1) {
       console.log('>>>>> signature ok');
@@ -56,75 +62,69 @@ export async function readMailboxPdfs(): Promise<string[]> {
 }
 
 async function readMailbox(): Promise<MailData[] | null> {
-  const connection: imap.ImapSimple = await imap.connect(config);
+  try {
+    const connection: imap.ImapSimple = await imap.connect(config);
 
-  await connection.openBox('INBOX').catch((err) => {
-    console.error('Error: ' + err.message);
-  });
+    await connection.openBox('INBOX').catch((err) => {
+      console.error('Error: ' + err.message);
+    });
 
-  // Fetch emails from the last 30min
-  const delay = 30 * 60 * 1000; // 24 * 60 * 60 *1000
-  const yesterday = new Date();
-  yesterday.setTime(Date.now() - delay);
-  const yesterday2 = yesterday.toISOString();
-  const searchCriteria = ['UNSEEN', ['SINCE', yesterday2]];
-  const fetchOptions = {
-    bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
-    struct: true,
-  };
+    // Fetch emails from the last 30min
+    const delay = 30 * 60 * 1000; // 24 * 60 * 60 *1000
+    const yesterday = new Date();
+    yesterday.setTime(Date.now() - delay);
+    const yesterday2 = yesterday.toISOString();
+    console.log('READ Mail from: ' + yesterday2);
+    const searchCriteria = ['UNSEEN', ['SINCE', yesterday2]];
+    const fetchOptions = {
+      bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
+      struct: true,
+    };
 
-  // retrieve only the headers of the messages
-  const messages: imap.Message[] = await connection.search(searchCriteria, fetchOptions);
+    // retrieve only the headers of the messages
+    const messages: imap.Message[] = await connection.search(searchCriteria, fetchOptions);
 
-  if (!messages || messages.length <= 0) {
-    return null;
-  }
-
-  let attachments: Promise<any>[] = [];
-
-  messages.forEach(async (message: imap.Message) => {
-    //loop through each e-mail..
-    const parts = imap.getParts(message.attributes.struct as any);
-
-    let attachment: any = parts
-      .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
-      .filter((part: any) => {
-        const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
-        return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
-      })
-      .map(async (part: any) => {
-        // retrieve the attachments only of the messages with attachments
-        const partData: any = await connection.getPartData(message, part).catch((err) => {
-          console.log(err);
-          return false;
-        });
-        return {
-          filename: part.disposition.params.filename,
-          data: partData,
-        };
-      });
-    // );
-
-    console.log('attachment: ' + attachment);
-    const email = message.parts[0].body.from[0].split('<')[1].split('>')[0];
-    const from = message.parts[0].body.from[0].split('<')[0];
-    console.log('EMAIL: ' + email + ' FROM: ' + from);
-
-    if (attachment && attachment.filename) {
-      console.log('Attachment: ' + attachment);
-      await sendSuccessMail(email, from);
-    } else {
-      console.error('No Attachment found');
-      await sendErrorMail(email, from, 'No Attachment found');
+    if (!messages || messages.length <= 0) {
+      return null;
     }
-    attachments = attachments.concat(attachment);
-  });
 
-  if (attachments.length <= 0) {
+    let attachments: MailData[] = [];
+
+    messages.forEach(async (message: imap.Message) => {
+      //loop through each e-mail..
+      const parts = imap.getParts(message.attributes.struct as any);
+
+      const attachmentPart: any = parts
+        .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
+        .filter((part: any) => {
+          const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
+          return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
+        });
+
+      const partData: any = await connection.getPartData(message, attachmentPart);
+
+      const attachment: MailData = {
+        filename: attachmentPart.disposition.params.filename,
+        data: partData,
+        from: message.parts[0].body.from[0].split('<')[0],
+        email: message.parts[0].body.from[0].split('<')[1].split('>')[0],
+      };
+
+      attachments = attachments.concat(attachment);
+    });
+
+    connection.end();
+
+    if (attachments.length <= 0) {
+      return null;
+    }
+
+    return await Promise.all(attachments);
+  } catch (err) {
+    console.log(err.message);
+
     return null;
   }
-
-  return await Promise.all(attachments);
 }
 
 function extractOwllyId(pdf: string): Promise<string | null> {
@@ -174,6 +174,7 @@ async function readPdfOwllyIds(attachments: MailData[]): Promise<string[]> {
   return owllyIds.filter((owllyId: string | null) => owllyId !== null) as string[];
 }
 
+/*
 function sendErrorMail(email: string, name: string, errorMessage: string) {
   return db.collection('mail').add({
     to: email,
@@ -185,9 +186,9 @@ function sendErrorMail(email: string, name: string, errorMessage: string) {
       },
     },
   });
-}
+}*/
 
-function sendSuccessMail(email: string, name: string) {
+/*function sendSuccessMail(email: string, name: string) {
   return db.collection('mail').add({
     to: email,
     template: {
@@ -197,7 +198,7 @@ function sendSuccessMail(email: string, name: string) {
       },
     },
   });
-}
+}*/
 
 // Test: run locally
 // (async () => {

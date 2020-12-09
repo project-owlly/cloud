@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 
-import {readMailboxPdfs} from '../../utils/mailbox/mailbox.utils';
+import {readMailboxPdfs} from '../../scheduler/mailbox/utils/mailbox.utils';
 
 export async function mailboxGet(request: functions.Request, response: functions.Response<any>): Promise<void> {
   try {
