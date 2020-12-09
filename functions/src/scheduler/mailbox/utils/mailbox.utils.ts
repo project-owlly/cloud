@@ -90,30 +90,30 @@ async function readMailbox(): Promise<MailData[] | null> {
     let attachments: MailData[] = [];
 
     for (const message of messages) {
-      //messages.forEach(async (message: imap.Message) => {
-      //loop through each e-mail..
-      const parts = imap.getParts(message.attributes.struct as any);
+      try {
+        const parts = imap.getParts(message.attributes.struct as any);
+        const attachmentPart: any = parts
+          .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
+          .filter((part: any) => {
+            const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
+            return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
+          });
 
-      const attachmentPart: any = parts
-        .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
-        .filter((part: any) => {
-          const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
-          return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
-        });
+        console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
+        const partData: any = await connection.getPartData(message, attachmentPart[0]);
 
-      console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
+        const attachment: MailData = {
+          filename: attachmentPart[0].disposition.params.filename,
+          data: partData,
+          from: message.parts[0].body.from[0].split('<')[0],
+          email: message.parts[0].body.from[0].split('<')[1].split('>')[0],
+        };
 
-      const partData: any = await connection.getPartData(message, attachmentPart);
-
-      const attachment: MailData = {
-        filename: attachmentPart.disposition.params.filename,
-        data: partData,
-        from: message.parts[0].body.from[0].split('<')[0],
-        email: message.parts[0].body.from[0].split('<')[1].split('>')[0],
-      };
-
-      attachments = attachments.concat(attachment);
-      // });
+        attachments = attachments.concat(attachment);
+      } catch (err) {
+        console.error('ERROR ATTACHMENT' + JSON.stringify(err.message));
+        //Send ERROR Mail?
+      }
     }
 
     connection.end();
@@ -124,7 +124,7 @@ async function readMailbox(): Promise<MailData[] | null> {
 
     return await Promise.all(attachments);
   } catch (err) {
-    console.log(err.message);
+    console.log('Error: ' + err.message + JSON.stringify(err));
 
     return null;
   }
