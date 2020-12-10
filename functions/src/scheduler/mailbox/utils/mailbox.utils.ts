@@ -115,7 +115,7 @@ export async function readMailboxPdfs() {
             status: 'open',
           });
 
-          await sendSuccessMail(attachment.email, docUnsigned.first_name);
+          await sendSuccessMail(attachment.email, docUnsigned.data().first_name);
         } else if (!docUnsigned.exist) {
           console.error('someone is doing strange stuff');
           //TODO: SEND ERROR MAIL
