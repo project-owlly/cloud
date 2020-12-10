@@ -105,7 +105,8 @@ export async function readMailboxPdfs() {
               fileUrl: signedFileUrl,
               ...docUnsigned.data(),
             });
-          await docUnsigned.remove();
+
+          await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
 
           const postalCode = docUnsigned.data().postal_code;
           await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
