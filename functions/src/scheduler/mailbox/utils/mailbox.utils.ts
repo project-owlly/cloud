@@ -62,7 +62,7 @@ export async function readMailboxPdfs() {
         const docUnsigned: FirebaseFirestore.DocumentData = await db
           .collection('owlly-admin')
           .doc(pdfMetadata.owllyId)
-          .collection('unsigend') // <<<<<<<<<<<
+          .collection('unsigned') // <<<<<<<<<<<
           .doc(pdfMetadata.eId)
           .get();
 
