@@ -87,6 +87,7 @@ async function readMailbox(): Promise<MailData[] | null> {
     const messages: imap.Message[] = await connection.search(searchCriteria, fetchOptions);
 
     if (!messages || messages.length <= 0) {
+      console.log('No E-Mails on Server found');
       return null;
     }
 
@@ -127,6 +128,7 @@ async function readMailbox(): Promise<MailData[] | null> {
     connection.end();
 
     if (attachments.length <= 0) {
+      console.log(`No Attachments in ${messages.length} E-Mail(s) found`);
       return null;
     }
 
