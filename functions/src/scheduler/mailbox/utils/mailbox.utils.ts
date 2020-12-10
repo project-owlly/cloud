@@ -76,7 +76,7 @@ async function readMailbox(): Promise<MailData[] | null> {
     const delay = 30 * 60 * 1000; // 24 * 60 * 60 *1000
     const yesterday = new Date(Date.now() - new Date().getTimezoneOffset() * 60 * 1000 - delay).toISOString();
 
-    console.log('READ Mail from: ' + yesterday);
+    console.log('READ Mail since: ' + yesterday);
     const searchCriteria = ['UNSEEN', ['SINCE', yesterday]];
     const fetchOptions = {
       bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
@@ -88,6 +88,8 @@ async function readMailbox(): Promise<MailData[] | null> {
 
     if (!messages || messages.length <= 0) {
       console.log('No E-Mails on Server found');
+
+      connection.end();
       return null;
     }
 
@@ -105,8 +107,12 @@ async function readMailbox(): Promise<MailData[] | null> {
 
         //console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
         if (attachmentPart.length <= 0) {
-          // KEIN PDF vorhanden, das den Kriterien entspricht.
-          // TODO: Email senden?
+          console.log('No matching attachment in email found (owlly-error-001)');
+          await sendErrorMail(
+            message.parts[0].body.from[0].split('<')[1].split('>')[0],
+            message.parts[0].body.from[0].split('<')[0],
+            'No matching attachment in email found (owlly-error-001)'
+          );
         } else {
           const partData: any = await connection.getPartData(message, attachmentPart[0]);
 
@@ -119,9 +125,15 @@ async function readMailbox(): Promise<MailData[] | null> {
 
           attachments = attachments.concat(attachment);
         }
+        //Message löschen (Falls später die Signatur falsch ist, kann eine E-Mail gesendet werden.)
+        await connection.addFlags(String(message.attributes.uid), 'Deleted');
       } catch (err) {
-        console.error('ERROR ATTACHMENT' + JSON.stringify(err.message));
-        await sendErrorMail(message.parts[0].body.from[0].split('<')[1].split('>')[0], message.parts[0].body.from[0].split('<')[0], err.message);
+        console.error('General attachment error (owlly-error-002) ' + JSON.stringify(err.message));
+        await sendErrorMail(
+          message.parts[0].body.from[0].split('<')[1].split('>')[0],
+          message.parts[0].body.from[0].split('<')[0],
+          'General attachment error (owlly-error-002)'
+        );
       }
     }
 
