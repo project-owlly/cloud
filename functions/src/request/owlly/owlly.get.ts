@@ -17,7 +17,7 @@ export function getOwlly(request: functions.Request, response: functions.Respons
 
   corsHandler(request, response, async () => {
     try {
-      let owllyData: any = await db.collection('owlly').doc('vrrYZoolx2XSy23RW63f').get();
+      const owllyData: any = await db.collection('owlly').doc('vrrYZoolx2XSy23RW63f').get();
 
       console.log(
         JSON.stringify({

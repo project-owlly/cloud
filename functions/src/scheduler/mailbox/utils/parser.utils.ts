@@ -2,7 +2,9 @@ import {sha256} from 'js-sha256';
 
 //import { Accounts } from 'web3-eth-accounts';
 //import { AccountsBase } from 'web3-core';
-import Accounts from 'web3-eth-accounts';
+//import{ Accounts} from 'web3-eth-accounts';
+
+const Accounts = require('web3-eth-accounts');
 
 /*declare module 'web3-eth-accounts' {
   export default class Accounts extends AccountsBase {}

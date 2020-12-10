@@ -33,7 +33,7 @@ interface MailData {
   email: string;
 }
 
-export async function readMailboxPdfs(): Promise<string[]> {
+export async function readMailboxPdfs() {
   console.log('>>> READ MAILBOX');
 
   const attachments: MailData[] | null = await readMailbox();
@@ -44,24 +44,59 @@ export async function readMailboxPdfs(): Promise<string[]> {
 
   console.log('>>> SIGNATURE');
 
-  for (const attachement of attachments) {
-    console.log('loop over mails with attachment from: ' + attachement.from + ' email: ' + attachement.email);
-    const signatures = getSignatures(attachement.data);
+  for (const attachment of attachments) {
+    console.log('loop over mails with attachment from: ' + attachment.from + ' email: ' + attachment.email);
+    const signatures = getSignatures(attachment.data);
     if (signatures.length >= 1) {
       console.log('>>> >>> signature ok');
-      console.log(JSON.stringify(signatures[0]));
+      //console.log(JSON.stringify(signatures[0]));
 
       const signature = await checkRevocation(signatures[0]);
-      console.log(signature);
+      if (signature.sig || signature.err) {
+        console.log('>>> >>> revocation issue');
+      } else {
+        console.log('>>> >>> revocation status good');
+
+        const pdfMetadata: any = await readPdfMetaData(attachment);
+
+        const doc = await db.collection('owlly').doc(pdfMetadata.owllyId).collection('signed').doc(pdfMetadata.eId).get();
+        if (!doc.exists) {
+          console.log('upload file! ' + attachment.filename);
+          console.log(attachment.data);
+
+          /*await db.collection('owlly').doc(metadata.owllyId).collection('signed').doc(metadata.eId).set({
+            imported: new Date()
+          });
+
+          const owllyPDF = await admin
+          .storage()
+          .bucket().file('signed/' + metadata.owllyId + '/' +  metadata.eId + '/' + attachment.filename + '.pdf', {});
+          
+          owllyPDF.createWriteStream({
+            contentType: 'application/pdf',
+            metadata: {
+              customMetadata: {
+                owllyId: metadata.owllyId,
+                eId: metadata.eId,
+              },
+            },
+          })
+        */
+        } else {
+          console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId);
+        }
+      }
+
+      //console.log(signature);
     } else {
       console.log('>>> >>> signature NOT ok');
     }
   }
 
   console.log('>>> OWLLYID ');
-  const owllyIds: string[] = await readPdfOwllyIds(attachments);
-
-  return owllyIds;
+  //const owllyIds: string[] = await readPdfOwllyIds(attachments);
+  return;
+  //return owllyIds;
 }
 
 async function readMailbox(): Promise<MailData[] | null> {
@@ -177,6 +212,30 @@ function extractOwllyId(pdf: string): Promise<string | null> {
   });
 }
 
+function extractEid(pdf: string): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const loadingTask: PDFLoadingTask<PDFDocumentProxy> = pdfjsLib.getDocument(pdf);
+
+    loadingTask.promise.then(
+      async (doc) => {
+        const metadata: {
+          info: PDFInfo;
+          metadata: PDFMetadata;
+        } = await doc.getMetadata();
+
+        const eId: string | null =
+          metadata && metadata.info && metadata.info.Custom && metadata.info.Custom.Eid !== undefined ? metadata.info.Custom.Eid : null;
+
+        resolve(eId);
+      },
+      (err) => {
+        console.error(err);
+        resolve(null);
+      }
+    );
+  });
+}
+
 async function writeFile(data: MailData): Promise<string> {
   const output: string = path.join(os.tmpdir(), data.filename);
   await fs.writeFile(output, data.data, 'utf8');
@@ -184,21 +243,25 @@ async function writeFile(data: MailData): Promise<string> {
   return output;
 }
 
-async function readPdfOwllyId(data: MailData): Promise<string | null> {
+async function readPdfMetaData(data: MailData): Promise<any | null> {
   const pdf: string = await writeFile(data);
 
-  return await extractOwllyId(pdf);
+  const owllyId: string | null = await extractOwllyId(pdf);
+  const eId: string | null = await extractEid(pdf);
+
+  return {owllyId: owllyId, eId: eId};
 }
 
+/*
 async function readPdfOwllyIds(attachments: MailData[]): Promise<string[]> {
-  const owllyIds: (string | null)[] = await Promise.all(attachments.map((d: MailData) => readPdfOwllyId(d)));
+  const owllyIds: (string | null)[] = await Promise.all(attachments.map((d: MailData) => readPdfMetaData(d)));
 
   if (!owllyIds || owllyIds.length <= 0) {
     return [];
   }
 
   return owllyIds.filter((owllyId: string | null) => owllyId !== null) as string[];
-}
+}*/
 
 async function sendErrorMail(email: string, name: string, errorMessage: string) {
   await db.collection('mail').add({

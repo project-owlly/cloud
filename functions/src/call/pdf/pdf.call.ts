@@ -23,7 +23,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     };
   }
 
-  let formData: any = data;
+  const formData: any = data;
   const owllyData = await db.collection('owlly').doc(owllyId).get();
   if (owllyData.exists) {
     //für testformular auf owllywebsite
