@@ -33,7 +33,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   const owllyPDF = admin
     .storage()
     .bucket()
-    .file('owlly/' + data.owllyId + '/' + data.userData.postal_code + '/' + data.userData.sub + '/' + data.owllyData.filename + '.pdf', {});
+    .file('unsigned/' + data.owllyId + '/' + data.userData.sub + '/' + data.owllyData.filename + '.pdf', {});
 
   const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
@@ -65,6 +65,18 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     //responseType: 'application/pdf',
     //contentType: 'application/pdf',
   });
+
+  // Make entry in DB
+  await db
+    .collection('owlly-admin')
+    .doc(owllyId)
+    .collection('unsigned')
+    .doc(eId)
+    .set({
+      generated: new Date(),
+      ...data.userData,
+    });
+
   return {
     url: signedURL[0],
   };

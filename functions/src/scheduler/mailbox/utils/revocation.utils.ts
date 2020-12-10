@@ -34,7 +34,7 @@ export async function checkRevocation(sig: any) {
 
     const data = r.data;
 
-    console.log('Revocation status:', data);
+    //console.log('Revocation status:', data);
 
     if (data === true || data.revoked) {
       return {

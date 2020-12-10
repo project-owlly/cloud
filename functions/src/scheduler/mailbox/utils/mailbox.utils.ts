@@ -51,7 +51,7 @@ export async function readMailboxPdfs() {
       console.log('>>> >>> signature ok');
       //console.log(JSON.stringify(signatures[0]));
 
-      const signature = await checkRevocation(signatures[0]);
+      const signature: any = checkRevocation(signatures[0]);
       if (signature.sig || signature.err) {
         console.log('>>> >>> revocation issue');
       } else {
@@ -59,31 +59,58 @@ export async function readMailboxPdfs() {
 
         const pdfMetadata: any = await readPdfMetaData(attachment);
 
-        const doc = await db.collection('owlly').doc(pdfMetadata.owllyId).collection('signed').doc(pdfMetadata.eId).get();
-        if (!doc.exists) {
-          console.log('upload file! ' + attachment.filename);
-          console.log(attachment.data);
+        const docSigned: FirebaseFirestore.DocumentData = await db
+          .collection('owlly-admin')
+          .doc(pdfMetadata.owllyId)
+          .collection('signed')
+          .doc(pdfMetadata.eId)
+          .get();
+        const docUnsigned: FirebaseFirestore.DocumentData = await db
+          .collection('owlly-admin')
+          .doc(pdfMetadata.owllyId)
+          .collection('signed')
+          .doc(pdfMetadata.eId)
+          .get();
 
-          /*await db.collection('owlly').doc(metadata.owllyId).collection('signed').doc(metadata.eId).set({
-            imported: new Date()
+        if (!docSigned.exists && docUnsigned.exists) {
+          //nur falls auch wirklich noch kein signierted vorhanden ist UND ein Request erstellt wurde.
+          console.log('upload file! ' + attachment.filename);
+
+          //save FILE
+          await admin
+            .storage()
+            .bucket()
+            .file('signed/' + pdfMetadata.owllyId + '/' + pdfMetadata.eId + '/' + attachment.filename, {})
+            .save(attachment.data);
+
+          //GET LINK
+          const signedFileUrl = await admin
+            .storage()
+            .bucket()
+            .file('signed/' + pdfMetadata.owllyId + '/' + pdfMetadata.eId + '/' + attachment.filename, {})
+            .getSignedUrl({
+              action: 'read',
+              expires: '2099-12-31',
+            });
+
+          //SAVE Signed document entry in DB
+          await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('signed').doc(pdfMetadata.eId).set({
+            imported: new Date(),
+            fileUrl: signedFileUrl,
           });
 
-          const owllyPDF = await admin
-          .storage()
-          .bucket().file('signed/' + metadata.owllyId + '/' +  metadata.eId + '/' + attachment.filename + '.pdf', {});
-          
-          owllyPDF.createWriteStream({
-            contentType: 'application/pdf',
-            metadata: {
-              customMetadata: {
-                owllyId: metadata.owllyId,
-                eId: metadata.eId,
-              },
-            },
-          })
-        */
+          const postalCode = docUnsigned.data().postal_code;
+          await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
+            imported: new Date(),
+            fileUrl: signedFileUrl,
+            status: 'open',
+          });
         } else {
-          console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId);
+          if (!docUnsigned.exists) {
+            console.error('someone is doing strange stuff');
+          } else {
+            console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId);
+          }
         }
       }
 
