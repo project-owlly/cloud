@@ -1,5 +1,4 @@
-export interface Owlly {
-  id: string;
+export interface OwllyData {
   author: string;
   published: Date;
   title: string;
@@ -13,4 +12,10 @@ export interface Owlly {
   ruleName: string;
   campaignerEmail: string;
   campaignerName: string;
+  slug: string;
+}
+
+export interface Owlly {
+  id: string;
+  data: OwllyData;
 }
