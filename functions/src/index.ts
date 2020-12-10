@@ -2,7 +2,6 @@ import * as functions from 'firebase-functions';
 import 'firebase-functions/lib/logger/compat';
 
 import {getOwlly} from './request/owlly/owlly.get';
-import {mailboxGet} from './request/mailbox/mailbox.get';
 import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
 import {callOidcAuthUrl, callOidcAuthUrlLogin} from './call/oidc/oidc.call';
@@ -16,7 +15,6 @@ import {sendFeedbackThankYouMail} from './firestore/feedback/feedback.create';
 
 // HTTP Requests (EXTERNAL) - Internal = from App should be onCall..
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
-export const mailbox = functions.region('europe-west6').https.onRequest(mailboxGet);
 
 // scheduler (Mailbox, Cleanup Documents)
 export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 30 minutes').onRun(readMailbox);
