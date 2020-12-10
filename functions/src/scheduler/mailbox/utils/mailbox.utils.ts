@@ -105,6 +105,8 @@ export async function readMailboxPdfs() {
             fileUrl: signedFileUrl,
             status: 'open',
           });
+
+          await sendSuccessMail(attachment.email, docUnsigned.first_name);
         } else {
           if (!docUnsigned.exists) {
             console.error('someone is doing strange stuff');
@@ -303,7 +305,7 @@ async function sendErrorMail(email: string, name: string, errorMessage: string) 
   });
 }
 
-/*function sendSuccessMail(email: string, name: string) {
+function sendSuccessMail(email: string, name: string) {
   return db.collection('mail').add({
     to: email,
     template: {
@@ -313,7 +315,7 @@ async function sendErrorMail(email: string, name: string, errorMessage: string) 
       },
     },
   });
-}*/
+}
 
 // Test: run locally
 // (async () => {
