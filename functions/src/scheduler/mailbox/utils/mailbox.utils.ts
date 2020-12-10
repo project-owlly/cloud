@@ -59,20 +59,21 @@ export async function readMailboxPdfs() {
 
         const pdfMetadata: any = await readPdfMetaData(attachment);
 
-        const docSigned: FirebaseFirestore.DocumentData = await db
-          .collection('owlly-admin')
-          .doc(pdfMetadata.owllyId)
-          .collection('signed')
-          .doc(pdfMetadata.eId)
-          .get();
         const docUnsigned: FirebaseFirestore.DocumentData = await db
           .collection('owlly-admin')
           .doc(pdfMetadata.owllyId)
-          .collection('signed')
+          .collection('unsigend') // <<<<<<<<<<<
           .doc(pdfMetadata.eId)
           .get();
 
-        if (!docSigned.exists && docUnsigned.exists) {
+        const docSigned: FirebaseFirestore.DocumentData = await db
+          .collection('owlly-admin')
+          .doc(pdfMetadata.owllyId)
+          .collection('signed') // <<<<<<<<<<<
+          .doc(pdfMetadata.eId)
+          .get();
+
+        if (docUnsigned.exists && !docSigned.exists) {
           //nur falls auch wirklich noch kein signierted vorhanden ist UND ein Request erstellt wurde.
           console.log('upload file! ' + attachment.filename);
 
@@ -94,10 +95,17 @@ export async function readMailboxPdfs() {
             });
 
           //SAVE Signed document entry in DB
-          await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('signed').doc(pdfMetadata.eId).set({
-            imported: new Date(),
-            fileUrl: signedFileUrl,
-          });
+          await db
+            .collection('owlly-admin')
+            .doc(pdfMetadata.owllyId)
+            .collection('signed')
+            .doc(pdfMetadata.eId)
+            .set({
+              imported: new Date(),
+              fileUrl: signedFileUrl,
+              ...docUnsigned.data(),
+            });
+          await docUnsigned.remove();
 
           const postalCode = docUnsigned.data().postal_code;
           await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
@@ -107,25 +115,23 @@ export async function readMailboxPdfs() {
           });
 
           await sendSuccessMail(attachment.email, docUnsigned.first_name);
+        } else if (!docUnsigned.exist) {
+          console.error('someone is doing strange stuff');
+          //TODO: SEND ERROR MAIL
+        } else if (docSigned.exist) {
+          console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId);
+          //TODO: SEND ERROR MAIL
         } else {
-          if (!docUnsigned.exists) {
-            console.error('someone is doing strange stuff');
-          } else {
-            console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId);
-          }
+          //TODO: SEND ERROR MAIL
+          console.error('error?');
         }
       }
-
-      //console.log(signature);
     } else {
       console.log('>>> >>> signature NOT ok');
+      //TODO: SEND ERROR MAIL
     }
   }
-
-  console.log('>>> OWLLYID ');
-  //const owllyIds: string[] = await readPdfOwllyIds(attachments);
   return;
-  //return owllyIds;
 }
 
 async function readMailbox(): Promise<MailData[] | null> {
