@@ -126,7 +126,8 @@ async function readMailbox(): Promise<MailData[] | null> {
           attachments = attachments.concat(attachment);
         }
         //Message löschen (Falls später die Signatur falsch ist, kann eine E-Mail gesendet werden.)
-        await connection.addFlags(String(message.attributes.uid), 'Deleted');
+        await connection.addFlags(String(message.attributes.uid), '\\Deleted');
+        //await connection.moveMessage(String(message.attributes.uid), 'Deleted');
       } catch (err) {
         console.error('General attachment error (owlly-error-002) ' + JSON.stringify(err.message));
         await sendErrorMail(
