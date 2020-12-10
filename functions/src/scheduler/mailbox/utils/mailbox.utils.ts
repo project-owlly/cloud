@@ -102,20 +102,19 @@ export async function readMailboxPdfs() {
             .doc(pdfMetadata.eId)
             .set({
               imported: new Date(),
-              fileUrl: signedFileUrl,
+              fileUrl: signedFileUrl[0],
               ...docUnsigned.data(),
             });
-
-          await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
 
           const postalCode = docUnsigned.data().postal_code;
           await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
             imported: new Date(),
-            fileUrl: signedFileUrl,
+            fileUrl: signedFileUrl[0],
             status: 'open',
           });
 
-          await sendSuccessMail(attachment.email, docUnsigned.data().first_name);
+          await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
+          await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
         } else if (!docUnsigned.exist) {
           console.error('someone is doing strange stuff');
           //TODO: SEND ERROR MAIL
