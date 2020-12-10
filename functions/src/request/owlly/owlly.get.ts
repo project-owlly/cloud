@@ -20,6 +20,7 @@ export function getOwlly(request: functions.Request, response: functions.Respons
 
   corsHandler(request, response, async () => {
     try {
+
       const snapshot = await db.collection('owlly').get();
 
       if (snapshot.empty) {
@@ -32,6 +33,7 @@ export function getOwlly(request: functions.Request, response: functions.Respons
           id: doc.id,
           data: doc.data(),
         } as Owlly;
+
       });
 
       response.json(results);

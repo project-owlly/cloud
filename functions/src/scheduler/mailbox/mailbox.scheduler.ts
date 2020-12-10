@@ -1,6 +1,6 @@
 import {EventContext} from 'firebase-functions';
 
-import {readMailboxPdfs} from '../../utils/mailbox/mailbox.utils';
+import {readMailboxPdfs} from './utils/mailbox.utils';
 
 export async function readMailbox(context: EventContext) {
   try {
