@@ -1,7 +1,9 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import * as imap from 'imap-simple';
-//import { format } from 'date-fns';
+//import * as imaps from 'imap-simple';
+//import {ImapSimple} from 'imap-simple'
+
+var imaps = require('imap-simple');
 
 const db = admin.firestore();
 const pdfjsLib = require('pdfjs-dist/es5/build/pdf.js');
@@ -49,11 +51,11 @@ export async function readMailboxPdfs() {
     const signatures = getSignatures(attachment.data);
     if (signatures.length >= 1) {
       console.log('>>> >>> signature ok');
-      //console.log(JSON.stringify(signatures[0]));
 
       const signature: any = checkRevocation(signatures[0]);
       if (signature.sig || signature.err) {
-        console.log('>>> >>> revocation issue');
+        console.error('>>> >>> revocation issue  (owlly-error-010)');
+        sendErrorMail(attachment.email, attachment.from, 'File not signed by valid eID+. (owlly-error-010)');
       } else {
         console.log('>>> >>> revocation status good');
 
@@ -116,19 +118,21 @@ export async function readMailboxPdfs() {
           await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
           await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
         } else if (!docUnsigned.exist) {
-          console.error('someone is doing strange stuff');
-          //TODO: SEND ERROR MAIL
-        } else if (docSigned.exist) {
-          console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId);
-          //TODO: SEND ERROR MAIL
+          console.error('someone is doing strange stuff? No request (=no plain pdf was generated for this user) exists. (owlly-error-002)');
+
+          sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
+          sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(docSigned.data()));
+        } else if (docUnsigned.exists && docSigned.exists) {
+          console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
+          sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again. (owlly-error-003)');
         } else {
-          //TODO: SEND ERROR MAIL
-          console.error('error?');
+          sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
+          console.error('Strange error, check logs.  (owlly-error-005)');
         }
       }
     } else {
-      console.log('>>> >>> signature NOT ok');
-      //TODO: SEND ERROR MAIL
+      console.error('>>> >>> signature NOT ok  (owlly-error-020)');
+      sendErrorMail(attachment.email, attachment.from, 'Signature is not valid. (owlly-error-020)');
     }
   }
   return;
@@ -136,9 +140,8 @@ export async function readMailboxPdfs() {
 
 async function readMailbox(): Promise<MailData[] | null> {
   try {
-    const connection: imap.ImapSimple = await imap.connect(config);
-
-    await connection.openBox('INBOX').catch((err) => {
+    const connection = await imaps.connect(config);
+    await connection.openBox('INBOX').catch((err: any) => {
       console.error('Error: ' + err.message);
     });
 
@@ -154,7 +157,7 @@ async function readMailbox(): Promise<MailData[] | null> {
     };
 
     // retrieve only the headers of the messages
-    const messages: imap.Message[] = await connection.search(searchCriteria, fetchOptions);
+    const messages = await connection.search(searchCriteria, fetchOptions);
 
     if (!messages || messages.length <= 0) {
       console.log('No E-Mails on Server found');
@@ -167,7 +170,7 @@ async function readMailbox(): Promise<MailData[] | null> {
 
     for (const message of messages) {
       try {
-        const parts = imap.getParts(message.attributes.struct as any);
+        const parts = imaps.getParts(message.attributes.struct);
         const attachmentPart: any = parts
           .filter((part: any) => part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT')
           .filter((part: any) => {
@@ -196,7 +199,10 @@ async function readMailbox(): Promise<MailData[] | null> {
           attachments = attachments.concat(attachment);
         }
         //Message löschen (Falls später die Signatur falsch ist, kann eine E-Mail gesendet werden.)
-        await connection.addFlags(String(message.attributes.uid), '\\Deleted');
+
+        //connection.addFlags(String(message.attributes.uid), "\Deleted");
+        await connection.deleteMessage([message.attributes.uid]);
+
         //await connection.moveMessage(String(message.attributes.uid), 'Deleted');
       } catch (err) {
         console.error('General attachment error (owlly-error-002) ' + JSON.stringify(err.message));
