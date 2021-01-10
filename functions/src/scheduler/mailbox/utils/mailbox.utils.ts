@@ -55,7 +55,7 @@ export async function readMailboxPdfs() {
       const signature: any = checkRevocation(signatures[0]);
       if (signature.sig || signature.err) {
         console.error('>>> >>> revocation issue  (owlly-error-010)');
-        sendErrorMail(attachment.email, attachment.from, 'File not signed by valid eID+. (owlly-error-010)');
+        await sendErrorMail(attachment.email, attachment.from, 'File not signed by valid eID+. (owlly-error-010)');
       } else {
         console.log('>>> >>> revocation status good');
 
@@ -120,19 +120,19 @@ export async function readMailboxPdfs() {
         } else if (!docUnsigned.exist) {
           console.error('someone is doing strange stuff? No request (=no plain pdf was generated for this user) exists. (owlly-error-002)');
 
-          sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
-          sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(docSigned.data()));
+          await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
+          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(docSigned.data()));
         } else if (docUnsigned.exists && docSigned.exists) {
           console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
-          sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again. (owlly-error-003)');
+          await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again. (owlly-error-003)');
         } else {
-          sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
+          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
           console.error('Strange error, check logs.  (owlly-error-005)');
         }
       }
     } else {
       console.error('>>> >>> signature NOT ok  (owlly-error-020)');
-      sendErrorMail(attachment.email, attachment.from, 'Signature is not valid. (owlly-error-020)');
+      await sendErrorMail(attachment.email, attachment.from, 'Signature is not valid. (owlly-error-020)');
     }
   }
   return;
