@@ -137,7 +137,7 @@ function generatePDFStempel(doc: PDFKit.PDFDocument) {
   doc
     .fillColor('#929496')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
+    .fontSize(6)
     .text(formatToTimeZone(new Date(), 'HH:mm', {timeZone: 'Europe/Berlin'}) + ' Uhr', 438, 348, {
       align: 'left',
     });
@@ -166,15 +166,15 @@ function generatePDFLines(doc: PDFKit.PDFDocument) {
 }
 
 function generatePDFLinesBeschriftungen(doc: PDFKit.PDFDocument) {
-  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Vorname, Name', 0, 284, {
+  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(6).text('Vorname, Name', 0, 284, {
     align: 'center',
   });
 
-  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Geburtsdatum', 140, 345, {
+  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(6).text('Geburtsdatum', 140, 345, {
     align: 'left',
   });
 
-  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(8).text('Adresse', 360, 345, {
+  doc.fillColor('#888888').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(6).text('Adresse', 360, 345, {
     align: 'left',
   });
 }
@@ -184,11 +184,11 @@ function generatePDFDownloadAufruf(doc: PDFKit.PDFDocument) {
     scale: 0.2,
   });
 
-  doc.fillColor('black').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('Dokument digital signieren und retournieren an', 0, 450, {
+  doc.fillColor('black').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(6).text('Dokument digital signieren und retournieren an', 0, 450, {
     align: 'center',
   });
 
-  doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(8).text('briefkasten@owlly.ch', 0, 462, {
+  doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(6).text('briefkasten@owlly.ch', 0, 462, {
     align: 'center',
   });
 }
@@ -211,7 +211,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
+    .fontSize(6)
     .text(
       'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
       45,
@@ -222,19 +222,19 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
       }
     );
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(8).text('Wortlaut des Begehrens', 45, 550, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(6).text('Wortlaut des Begehrens', 45, 550, {
     align: 'left',
   });
 
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`)
-    .fontSize(8)
+    .fontSize(6)
     .text('Urheber', 45, 575 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
     });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(8).text('Rückzugsklausel', 45, 750, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(6).text('Rückzugsklausel', 45, 750, {
     align: 'left',
   });
 }
@@ -243,7 +243,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
   /*doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
+    .fontSize(6)
     .text(
       'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
       45,
@@ -256,7 +256,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
+    .fontSize(6)
     .text(data.owllyData.text, 45, 560, {
       align: 'left',
       width: doc.page.width - 90,
@@ -265,7 +265,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(8)
+    .fontSize(6)
     .text(data.owllyData.author, 45, 595 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
       width: doc.page.width - 90,
@@ -276,7 +276,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
     doc
       .fillColor('#a6a8aa')
       .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-      .fontSize(8)
+      .fontSize(6)
       .text(
         'Das Initiativkomitee, bestehend aus den genannten Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
         45,
