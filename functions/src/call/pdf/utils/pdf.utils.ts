@@ -265,7 +265,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(6)
+    .fontSize(8)
     .text(data.owllyData.author, 45, 595 + doc.heightOfString(data.owllyData.text), {
       align: 'left',
       width: doc.page.width - 90,
