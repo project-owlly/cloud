@@ -13,9 +13,7 @@ import {readMailbox} from './scheduler/mailbox/mailbox.scheduler';
 import {sendNewsletterWelcomeMail} from './firestore/newsletter/newsletter.create';
 import {sendFeedbackThankYouMail} from './firestore/feedback/feedback.create';
 
-import {authUserCreate} from './auth/user.create';
-import {authUserCreateSendWelcomeMail} from './auth/user.create';
-import {authUserCreateSendVerifyMail} from './auth/user.create';
+import {authUserCreate, authUserCreateSendWelcomeMail, authUserCreateSendVerifyMail} from './auth/user.create';
 
 // HTTP Requests (EXTERNAL) - Internal = from App should be onCall..
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
