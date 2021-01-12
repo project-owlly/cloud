@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-admin.initializeApp(functions.config().firebase);
+//admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 export function authUserCreate(user: admin.auth.UserRecord, context: functions.EventContext) {
   //update
