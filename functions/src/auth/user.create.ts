@@ -35,7 +35,7 @@ export function authUserCreateSendWelcomeMail(user: admin.auth.UserRecord, conte
 export function authUserCreateSendVerifyMail(user: admin.auth.UserRecord, context: functions.EventContext) {
   //Send E-Mail that user has to verify his account first.
   if (!user.emailVerified) {
-    admin
+    return admin
       .auth()
       .generateEmailVerificationLink(user.email as string)
       .then((code: string) => {
