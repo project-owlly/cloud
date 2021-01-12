@@ -10,7 +10,7 @@ export function authUserCreate(user: admin.auth.UserRecord, context: functions.E
     .set({
       email: user.email,
       id: user.uid,
-      status: true,
+      //status: true,
     })
     .then((ok) => {
       return 'ok';
@@ -25,9 +25,6 @@ export function authUserCreateSendWelcomeMail(user: admin.auth.UserRecord, conte
     to: user.email,
     template: {
       name: 'userCreateWelcome',
-      data: {
-        firstName: name,
-      },
     },
   });
 }
