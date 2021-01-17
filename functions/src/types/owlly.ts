@@ -1,5 +1,3 @@
-import firebase from 'firebase/app';
-
 export interface OwllyData {
   title: string;
   text: string; //offizieller abstimmungstext
@@ -18,14 +16,14 @@ export interface OwllyData {
   author: string; // liste von komitee mitgliedern gemäss Volksbegehren
   campaignerEmail: string; //
   campaignerName: string; //
-  campaignerRef: firebase.firestore.DocumentReference; // aus benutzerprofil
+  campaignerRef: any; // aus benutzerprofil
 
-  published: firebase.firestore.Timestamp;
+  published: any;
 }
 
 export interface Owlly {
   id: string;
-  ref: firebase.firestore.DocumentReference;
+  ref: any;
 
   data: OwllyData;
 }
