@@ -5,12 +5,12 @@ import {QueryDocumentSnapshot} from 'firebase-functions/lib/providers/firestore'
 
 const db = admin.firestore();
 
-export async function sendFeedbackThankYouMail(snapshot: QueryDocumentSnapshot, context: functions.EventContext) {
+export async function sendInquiryThankYouMail(snapshot: QueryDocumentSnapshot, context: functions.EventContext) {
   try {
     await db.collection('mail').add({
       to: 'hi@owlly.ch',
       message: {
-        subject: 'Neues Feedback auf owlly.ch erhalten',
+        subject: 'Neue Frage auf owlly.ch erhalten',
         text: JSON.stringify(snapshot.data()),
       },
     });
@@ -18,7 +18,7 @@ export async function sendFeedbackThankYouMail(snapshot: QueryDocumentSnapshot, 
     return db.collection('mail').add({
       to: snapshot.data().email,
       template: {
-        name: 'feedbackThankyouMail',
+        name: 'inquiryThankYouMail',
         data: {
           firstName: snapshot.data().vorname,
         },
