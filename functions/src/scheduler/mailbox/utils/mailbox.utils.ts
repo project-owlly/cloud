@@ -172,7 +172,7 @@ async function readMailbox(): Promise<MailData[] | null> {
       try {
         const parts = imaps.getParts(message.attributes.struct);
         const attachmentPart: any = parts
-          .filter((part: any) => (part.disposition && part.disposition.type.toUpperCase() === 'ATTACHMENT') || 'INLINE')
+          .filter((part: any) => part.disposition && (part.disposition.type.toUpperCase() === 'ATTACHMENT' || part.disposition.type.toUpperCase() === 'INLINE'))
           .filter((part: any) => {
             const split: string[] = part.disposition.params && part.disposition.params.filename && part.disposition.params.filename.split('.').reverse();
             return split && split.length > 0 && 'pdf' === split[0].toLowerCase();
