@@ -81,7 +81,7 @@ function generatePDFHeader(doc: PDFKit.PDFDocument, data: any) {
     align: 'center',
   });
 
-  console.log(data.owllyData.published);
+  //console.log(data.owllyData.published);
 
   if (data.owllyData.type === 'referendum') {
     doc
