@@ -118,16 +118,15 @@ export async function readMailboxPdfs() {
           await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
           await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
         } else if (!docUnsigned.exist) {
-          console.error('someone is doing strange stuff? No request (=no plain pdf was generated for this user) exists. (owlly-error-002)');
-
+          console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
           await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
           await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(docSigned.data()));
         } else if (docUnsigned.exists && docSigned.exists) {
           console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
           await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again. (owlly-error-003)');
         } else {
-          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
           console.error('Strange error, check logs.  (owlly-error-005)');
+          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
         }
       }
     } else {
