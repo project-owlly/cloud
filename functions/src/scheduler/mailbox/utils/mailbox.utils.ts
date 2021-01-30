@@ -114,8 +114,8 @@ export async function readMailboxPdfs() {
             fileUrl: signedFileUrl[0],
             status: 'open',
           });
-
-          await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
+          //keep that to inform user, that he already signed.
+          //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
           await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
         } else if (!docUnsigned.exist) {
           console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
