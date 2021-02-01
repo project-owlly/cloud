@@ -123,7 +123,7 @@ export async function readMailboxPdfs() {
           await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(docSigned.data()));
         } else if (docUnsigned.exists && docSigned.exists) {
           console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
-          await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again. (owlly-error-003)');
+          await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again :) . (owlly-error-003)');
         } else {
           console.error('Strange error, check logs.  (owlly-error-005)');
           await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
