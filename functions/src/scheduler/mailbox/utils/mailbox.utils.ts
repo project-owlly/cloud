@@ -4,6 +4,7 @@ import * as admin from 'firebase-admin';
 //import {ImapSimple} from 'imap-simple'
 
 var imaps = require('imap-simple');
+const OpenTimestamps = require('opentimestamps');
 
 const db = admin.firestore();
 const pdfjsLib = require('pdfjs-dist/es5/build/pdf.js');
@@ -36,42 +37,29 @@ interface MailData {
 }
 
 export async function readMailboxPdfs() {
-  console.log('>>> READ MAILBOX');
-
   const attachments: MailData[] | null = await readMailbox();
-
   if (!attachments || attachments.length <= 0) {
     return [];
   }
 
-  console.log('>>> SIGNATURE');
-
   for (const attachment of attachments) {
-    console.log('loop over mails with attachment from: ' + attachment.from + ' email: ' + attachment.email);
     const signatures = getSignatures(attachment.data);
     if (signatures.length >= 1) {
-      console.log('>>> >>> signature ok');
-
       const signature: any = checkRevocation(signatures[0]);
       if (signature.sig || signature.err) {
         console.error('>>> >>> revocation issue  (owlly-error-010)');
         await sendErrorMail(attachment.email, attachment.from, 'File not signed by valid eID+. (owlly-error-010)');
       } else {
-        console.log('>>> >>> revocation status good');
-
         const pdfMetadata: any = await readPdfMetaData(attachment);
 
-        const docUnsigned: FirebaseFirestore.DocumentData = await db
-          .collection('owlly-admin')
-          .doc(pdfMetadata.owllyId)
-          .collection('unsigned') // <<<<<<<<<<<
-          .doc(pdfMetadata.eId)
-          .get();
+        //Get Temp File from "request" -> should be YES
+        const docUnsigned: FirebaseFirestore.DocumentData = await db.collection('tempfiles').doc(pdfMetadata.tempOwllyDoc).get();
 
+        //Check if already a signed File is here? -> should be NO
         const docSigned: FirebaseFirestore.DocumentData = await db
           .collection('owlly-admin')
           .doc(pdfMetadata.owllyId)
-          .collection('signed') // <<<<<<<<<<<
+          .collection('signed')
           .doc(pdfMetadata.eId)
           .get();
 
@@ -79,39 +67,72 @@ export async function readMailboxPdfs() {
           //nur falls auch wirklich noch kein signierted vorhanden ist UND ein Request erstellt wurde.
           console.log('upload file! ' + attachment.filename);
 
-          //save FILE
+          const importDate = new Date();
+          const postalCode = docUnsigned.data().postalcode;
+
+          //SAVE ORIGINAL SIGNED FILE TO FIREBASE STORAGE
           await admin
             .storage()
             .bucket()
-            .file('signed/' + pdfMetadata.owllyId + '/' + pdfMetadata.eId + '/' + attachment.filename, {})
+            .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
             .save(attachment.data);
 
           //GET LINK
           const signedFileUrl = await admin
             .storage()
             .bucket()
-            .file('signed/' + pdfMetadata.owllyId + '/' + pdfMetadata.eId + '/' + attachment.filename, {})
+            .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
             .getSignedUrl({
               action: 'read',
-              expires: '2099-12-31',
+              expires: '2099-12-31', //TODO: CHANGE THIS!!!!
             });
 
-          //SAVE Signed document entry in DB
+          // TIMESTAMP MAGIC
+          //FILE = attachment.data
+          const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), attachment.data);
+          const infoResult = OpenTimestamps.info(detached);
+
+          //TIMESTAMP
+          await OpenTimestamps.stamp(detached);
+          const fileOts = detached.serializeToBytes();
+
+          //SAVE TIMESTAMPED FILE TO FIREBASE STORAGE
+          await admin
+            .storage()
+            .bucket()
+            .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+            .save(fileOts);
+
+          //GET LINK from TIMESTAMPED FILE
+          const opentimestampsFileUrl = await admin
+            .storage()
+            .bucket()
+            .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+            .getSignedUrl({
+              action: 'read',
+              expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+            });
+
+          //SAVE Signed document URL entry in DB under Tempfiles
           await db
-            .collection('owlly-admin')
-            .doc(pdfMetadata.owllyId)
-            .collection('signed')
-            .doc(pdfMetadata.eId)
-            .set({
-              imported: new Date(),
-              fileUrl: signedFileUrl[0],
-              ...docUnsigned.data(),
-            });
+            .collection('tempfiles')
+            .doc(docUnsigned.id)
+            .set(
+              {
+                imported: importDate,
+                firebasestorage: signedFileUrl[0],
+                opentimestamps: opentimestampsFileUrl[0],
+                opentimestampsInfo: String(infoResult),
+              },
+              {
+                merge: true,
+              }
+            );
 
-          const postalCode = docUnsigned.data().postal_code;
           await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
-            imported: new Date(),
-            fileUrl: signedFileUrl[0],
+            imported: importDate,
+            firebasestorage: signedFileUrl[0],
+            opentimestamps: opentimestampsFileUrl[0],
             status: 'open',
           });
           //keep that to inform user, that he already signed.
