@@ -137,7 +137,16 @@ export async function readMailboxPdfs() {
 
             //keep that to inform user, that he already signed.
             //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
-            await sendSuccessMail(attachment.email, attachment.from, hash, [fileOts, attachment.data]);
+            await sendSuccessMail(attachment.email, attachment.from, hash, [
+              {
+                filename: docUnsigned.data().filename + '.ots',
+                content: fileOts,
+              },
+              {
+                filename: docUnsigned.data().filename + '.pdf',
+                content: attachment.data,
+              },
+            ]);
 
             //Delete temp file & db entry
             await admin
@@ -377,7 +386,9 @@ async function sendErrorMail(email: string, name: string, errorMessage: string) 
 function sendSuccessMail(email: string, name: string, hash: string, attachments: any[]) {
   return db.collection('mail').add({
     to: email,
-    attachments: attachments,
+    message: {
+      attachments: attachments,
+    },
     template: {
       name: 'inboxSuccess',
       data: {
