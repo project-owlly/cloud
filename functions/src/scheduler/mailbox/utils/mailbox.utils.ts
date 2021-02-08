@@ -297,6 +297,30 @@ function extractEid(pdf: string): Promise<string | null> {
   });
 }
 
+function extractFileId(pdf: string): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const loadingTask: PDFLoadingTask<PDFDocumentProxy> = pdfjsLib.getDocument(pdf);
+
+    loadingTask.promise.then(
+      async (doc) => {
+        const metadata: {
+          info: PDFInfo;
+          metadata: PDFMetadata;
+        } = await doc.getMetadata();
+
+        const fileId: string | null =
+          metadata && metadata.info && metadata.info.Custom && metadata.info.Custom.FileId !== undefined ? metadata.info.Custom.FileId : null;
+
+        resolve(fileId);
+      },
+      (err) => {
+        console.error(err);
+        resolve(null);
+      }
+    );
+  });
+}
+
 async function writeFile(data: MailData): Promise<string> {
   const output: string = path.join(os.tmpdir(), data.filename);
   await fs.writeFile(output, data.data, 'utf8');
@@ -309,8 +333,9 @@ async function readPdfMetaData(data: MailData): Promise<any | null> {
 
   const owllyId: string | null = await extractOwllyId(pdf);
   const eId: string | null = await extractEid(pdf);
+  const fileId: string | null = await extractFileId(pdf);
 
-  return {owllyId: owllyId, eId: eId};
+  return {owllyId: owllyId, eId: eId, fileId: fileId};
 }
 
 /*
