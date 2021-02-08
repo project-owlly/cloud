@@ -96,7 +96,7 @@ export async function readMailboxPdfs() {
               .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .save(fileOts);
 
-            //GET LINK from TIMESTAMPED FILE
+            //GET SIGNED URL LINK from TIMESTAMPED FILE
             const opentimestampsFileUrl = await admin
               .storage()
               .bucket()
@@ -117,6 +117,7 @@ export async function readMailboxPdfs() {
                   firebasestorage: signedFileUrl[0],
                   opentimestamps: opentimestampsFileUrl[0],
                   opentimestampsInfo: String(infoResult),
+                  hash: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
                 },
                 {
                   merge: true,
