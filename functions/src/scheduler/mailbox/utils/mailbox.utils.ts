@@ -374,12 +374,10 @@ async function sendErrorMail(email: string, name: string, errorMessage: string) 
   });
 }
 
-function sendSuccessMail(email: string, name: string, hash: string, attachment: any[]) {
+function sendSuccessMail(email: string, name: string, hash: string, attachments: any[]) {
   return db.collection('mail').add({
     to: email,
-    message: {
-      attachment: attachment,
-    },
+    attachments: attachments,
     template: {
       name: 'inboxSuccess',
       data: {
