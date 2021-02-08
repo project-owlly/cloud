@@ -107,6 +107,7 @@ export async function readMailboxPdfs() {
               });
 
             //SAVE Signed document URL entry in DB under Tempfiles
+            const hash = String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0];
             await db
               .collection('tempfiles')
               .doc(docUnsigned.id)
@@ -117,30 +118,26 @@ export async function readMailboxPdfs() {
                   firebasestorage: signedFileUrl[0],
                   opentimestamps: opentimestampsFileUrl[0],
                   opentimestampsInfo: String(infoResult),
-                  hash: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
+                  hash: hash,
                 },
                 {
                   merge: true,
                 }
               );
 
-            await db
-              .collection('owlly-campaigner')
-              .doc(pdfMetadata.owllyId)
-              .collection(String(postalCode))
-              .add({
-                certified: false,
-                postalCode: postalCode,
-                imported: importDate,
-                generated: docUnsigned.data().generated,
-                firebasestorage: signedFileUrl[0],
-                opentimestamps: opentimestampsFileUrl[0],
-                hash: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
-              });
+            await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
+              certified: false,
+              postalCode: postalCode,
+              imported: importDate,
+              generated: docUnsigned.data().generated,
+              firebasestorage: signedFileUrl[0],
+              opentimestamps: opentimestampsFileUrl[0],
+              hash: hash,
+            });
 
             //keep that to inform user, that he already signed.
             //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
-            await sendSuccessMail(attachment.email, attachment.from);
+            await sendSuccessMail(attachment.email, attachment.from, hash, [fileOts, attachment.data]);
 
             //Delete temp file & db entry
             await admin
@@ -377,13 +374,17 @@ async function sendErrorMail(email: string, name: string, errorMessage: string) 
   });
 }
 
-function sendSuccessMail(email: string, name: string) {
+function sendSuccessMail(email: string, name: string, hash: string, attachment: any[]) {
   return db.collection('mail').add({
     to: email,
+    message: {
+      attachment: attachment,
+    },
     template: {
       name: 'inboxSuccess',
       data: {
         firstName: name,
+        hash: hash,
       },
     },
   });
