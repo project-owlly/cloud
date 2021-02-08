@@ -130,9 +130,17 @@ export async function readMailboxPdfs() {
               opentimestamps: opentimestampsFileUrl[0],
               status: 'open',
             });
+
             //keep that to inform user, that he already signed.
             //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
             await sendSuccessMail(attachment.email, attachment.from);
+
+            //Delete temp file
+            await admin
+              .storage()
+              .bucket()
+              .file('tempfiles/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
+              .delete();
           } else if (!docUnsigned.exist) {
             console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
             await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
