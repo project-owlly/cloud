@@ -124,23 +124,32 @@ export async function readMailboxPdfs() {
                 }
               );
 
-            await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
-              imported: importDate,
-              firebasestorage: signedFileUrl[0],
-              opentimestamps: opentimestampsFileUrl[0],
-              status: 'open',
-            });
+            await db
+              .collection('owlly-campaigner')
+              .doc(pdfMetadata.owllyId)
+              .collection(String(postalCode))
+              .add({
+                certified: false,
+                postalCode: postalCode,
+                imported: importDate,
+                generated: docUnsigned.data().generated,
+                firebasestorage: signedFileUrl[0],
+                opentimestamps: opentimestampsFileUrl[0],
+                hash: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
+              });
 
             //keep that to inform user, that he already signed.
             //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
             await sendSuccessMail(attachment.email, attachment.from);
 
-            //Delete temp file
+            //Delete temp file & db entry
             await admin
               .storage()
               .bucket()
               .file('tempfiles/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .delete();
+
+            await db.collection('tempfiles').doc(docUnsigned.id).delete();
           } else if (!docUnsigned.exist) {
             console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
             await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
