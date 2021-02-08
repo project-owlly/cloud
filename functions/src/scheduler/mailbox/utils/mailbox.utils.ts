@@ -131,7 +131,7 @@ export async function readMailboxPdfs() {
             });
             //keep that to inform user, that he already signed.
             //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
-            await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
+            await sendSuccessMail(attachment.email, attachment.from);
           } else if (!docUnsigned.exist) {
             console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
             await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
