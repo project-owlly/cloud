@@ -116,7 +116,8 @@ export async function readMailboxPdfs() {
                   imported: importDate,
                   firebasestorage: signedFileUrl[0],
                   opentimestamps: opentimestampsFileUrl[0],
-                  opentimestampsInfo: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
+                  opentimestampsInfo: String(infoResult),
+                  hash: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
                 },
                 {
                   merge: true,
