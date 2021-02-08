@@ -67,14 +67,14 @@ export async function readMailboxPdfs() {
             await admin
               .storage()
               .bucket()
-              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .save(attachment.data);
 
             //GET LINK
             const signedFileUrl = await admin
               .storage()
               .bucket()
-              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .getSignedUrl({
                 action: 'read',
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
@@ -93,14 +93,14 @@ export async function readMailboxPdfs() {
             await admin
               .storage()
               .bucket()
-              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .save(fileOts);
 
             //GET LINK from TIMESTAMPED FILE
             const opentimestampsFileUrl = await admin
               .storage()
               .bucket()
-              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .getSignedUrl({
                 action: 'read',
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
@@ -131,7 +131,7 @@ export async function readMailboxPdfs() {
             });
             //keep that to inform user, that he already signed.
             //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
-            await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
+            await sendSuccessMail(attachment.email, attachment.from);
           } else if (!docUnsigned.exist) {
             console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
             await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
