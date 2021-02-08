@@ -3,19 +3,20 @@ import * as admin from 'firebase-admin';
 
 import {generatePDFDoc} from './utils/pdf.utils';
 
+const crypto = require('crypto');
+
 const db = admin.firestore();
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
   Eid: string;
+  FileId: string;
 }
 
 export async function callGeneratePdfUrl(data: any, context: CallableContext): Promise<any | undefined> {
-  //console.log("data " + JSON.stringify(data));
-  //console.log("context " + JSON.stringify(context.rawRequest.body));
-
   const owllyId: string | undefined = data.owllyId;
-  const eId: string = data.userData.sub;
+  const hash = crypto.createHash('sha256');
+  const eId: string = hash.update(data.userData.sub).digest('hex'); // data.userData.sub;
 
   if (!owllyId) {
     return {
@@ -25,15 +26,29 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
 
   const formData: any = data;
   const owllyData = await db.collection('owlly').doc(owllyId).get();
+  //für testformular auf owllywebsite
   if (owllyData.exists) {
-    //für testformular auf owllywebsite
     formData['owllyData'] = owllyData.data();
   }
 
+  //SAVE FILE to Download later
+
+  // Make entry in DB
+  const tempOwllyDoc = await db.collection('tempfiles').add({
+    generated: new Date(),
+    postalcode: data.userData.postal_code,
+    statusSigned: false,
+    owllyId: owllyId,
+    eId: eId,
+    filename: data.owllyData.filename,
+  });
+
+  // Create a temp id..
+  // File only valid some hours..
   const owllyPDF = admin
     .storage()
     .bucket()
-    .file('unsigned/' + data.owllyId + '/' + data.userData.sub + '/' + data.owllyData.filename + '.pdf', {});
+    .file('tempfiles/' + tempOwllyDoc.id + '/' + data.owllyData.filename + '.pdf', {});
 
   const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
@@ -45,6 +60,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
         customMetadata: {
           owllyId: owllyId,
           eId: eId,
+          fileId: tempOwllyDoc.id,
         },
       },
     })
@@ -53,7 +69,9 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   // Metadata
   (doc.info as OwllyDocumentInfo).OwllyId = owllyId;
   (doc.info as OwllyDocumentInfo).Eid = eId;
+  (doc.info as OwllyDocumentInfo).FileId = tempOwllyDoc.id;
 
+  //Producer MetaData
   doc.info.Producer = 'Owlly';
   doc.info.Creator = 'Owlly';
 
@@ -65,17 +83,6 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     //responseType: 'application/pdf',
     //contentType: 'application/pdf',
   });
-
-  // Make entry in DB
-  await db
-    .collection('owlly-admin')
-    .doc(owllyId)
-    .collection('unsigned')
-    .doc(eId)
-    .set({
-      generated: new Date(),
-      ...data.userData,
-    });
 
   return {
     url: signedURL[0],

@@ -27,6 +27,7 @@
     "imap-simple": "^5.0.0",
     "js-sha256": "^0.9.0",
     "openid-client": "^4.1.1",
+    "opentimestamps": "^0.4.9",
     "pdfjs-dist": "^2.5.207",
     "pdfkit": "^0.11.0",
     "react": "^17.0.1",
