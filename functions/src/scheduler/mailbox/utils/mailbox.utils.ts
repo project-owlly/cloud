@@ -67,14 +67,14 @@ export async function readMailboxPdfs() {
             await admin
               .storage()
               .bucket()
-              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .save(attachment.data);
 
             //GET LINK
             const signedFileUrl = await admin
               .storage()
               .bucket()
-              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .getSignedUrl({
                 action: 'read',
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
@@ -93,14 +93,14 @@ export async function readMailboxPdfs() {
             await admin
               .storage()
               .bucket()
-              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .save(fileOts);
 
             //GET LINK from TIMESTAMPED FILE
             const opentimestampsFileUrl = await admin
               .storage()
               .bucket()
-              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .getSignedUrl({
                 action: 'read',
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
