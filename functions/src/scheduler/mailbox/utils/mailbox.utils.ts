@@ -16,6 +16,7 @@ import * as path from 'path';
 import * as os from 'os';
 import {getSignatures} from './parser.utils';
 import {checkRevocation} from './revocation.utils';
+import {exit} from 'process';
 
 /* MAILBOX */
 const config = {
@@ -53,99 +54,98 @@ export async function readMailboxPdfs() {
         const pdfMetadata: any = await readPdfMetaData(attachment);
 
         if (pdfMetadata && pdfMetadata.owllyId && pdfMetadata.fileId) {
-        } else {
-          //ERROR!!!
-        }
+          //Get Temp File from "request" -> should be YES
+          const docUnsigned: FirebaseFirestore.DocumentData = await db.collection('tempfiles').doc(pdfMetadata.fileId).get();
 
-        //Get Temp File from "request" -> should be YES
-        const docUnsigned: FirebaseFirestore.DocumentData = await db.collection('tempfiles').doc(pdfMetadata.fileId).get();
+          if (docUnsigned.exists && !docUnsigned.data().status) {
+            //nur falls auch wirklich noch kein signiertes vorhanden ist UND ein Request erstellt wurde.
+            console.log('upload file! ' + attachment.filename);
 
-        if (docUnsigned.exists && !docUnsigned.data().status) {
-          //nur falls auch wirklich noch kein signiertes vorhanden ist UND ein Request erstellt wurde.
-          console.log('upload file! ' + attachment.filename);
+            const importDate = new Date();
+            const postalCode = docUnsigned.data().postalcode;
 
-          const importDate = new Date();
-          const postalCode = docUnsigned.data().postalcode;
+            //SAVE ORIGINAL SIGNED FILE TO FIREBASE STORAGE
+            await admin
+              .storage()
+              .bucket()
+              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .save(attachment.data);
 
-          //SAVE ORIGINAL SIGNED FILE TO FIREBASE STORAGE
-          await admin
-            .storage()
-            .bucket()
-            .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
-            .save(attachment.data);
+            //GET LINK
+            const signedFileUrl = await admin
+              .storage()
+              .bucket()
+              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .getSignedUrl({
+                action: 'read',
+                expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+              });
 
-          //GET LINK
-          const signedFileUrl = await admin
-            .storage()
-            .bucket()
-            .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
-            .getSignedUrl({
-              action: 'read',
-              expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+            // TIMESTAMP MAGIC
+            //FILE = attachment.data
+            const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), attachment.data);
+            const infoResult = OpenTimestamps.info(detached);
+
+            //TIMESTAMP
+            await OpenTimestamps.stamp(detached);
+            const fileOts = detached.serializeToBytes();
+
+            //SAVE TIMESTAMPED FILE TO FIREBASE STORAGE
+            await admin
+              .storage()
+              .bucket()
+              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .save(fileOts);
+
+            //GET LINK from TIMESTAMPED FILE
+            const opentimestampsFileUrl = await admin
+              .storage()
+              .bucket()
+              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
+              .getSignedUrl({
+                action: 'read',
+                expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+              });
+
+            //SAVE Signed document URL entry in DB under Tempfiles
+            await db
+              .collection('tempfiles')
+              .doc(docUnsigned.id)
+              .set(
+                {
+                  statusSigned: true,
+                  imported: importDate,
+                  firebasestorage: signedFileUrl[0],
+                  opentimestamps: opentimestampsFileUrl[0],
+                  opentimestampsInfo: String(infoResult),
+                },
+                {
+                  merge: true,
+                }
+              );
+
+            await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
+              imported: importDate,
+              firebasestorage: signedFileUrl[0],
+              opentimestamps: opentimestampsFileUrl[0],
+              status: 'open',
             });
-
-          // TIMESTAMP MAGIC
-          //FILE = attachment.data
-          const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), attachment.data);
-          const infoResult = OpenTimestamps.info(detached);
-
-          //TIMESTAMP
-          await OpenTimestamps.stamp(detached);
-          const fileOts = detached.serializeToBytes();
-
-          //SAVE TIMESTAMPED FILE TO FIREBASE STORAGE
-          await admin
-            .storage()
-            .bucket()
-            .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
-            .save(fileOts);
-
-          //GET LINK from TIMESTAMPED FILE
-          const opentimestampsFileUrl = await admin
-            .storage()
-            .bucket()
-            .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename, {})
-            .getSignedUrl({
-              action: 'read',
-              expires: '2099-12-31', //TODO: CHANGE THIS!!!!
-            });
-
-          //SAVE Signed document URL entry in DB under Tempfiles
-          await db
-            .collection('tempfiles')
-            .doc(docUnsigned.id)
-            .set(
-              {
-                statusSigned: true,
-                imported: importDate,
-                firebasestorage: signedFileUrl[0],
-                opentimestamps: opentimestampsFileUrl[0],
-                opentimestampsInfo: String(infoResult),
-              },
-              {
-                merge: true,
-              }
-            );
-
-          await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
-            imported: importDate,
-            firebasestorage: signedFileUrl[0],
-            opentimestamps: opentimestampsFileUrl[0],
-            status: 'open',
-          });
-          //keep that to inform user, that he already signed.
-          //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
-          await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
-        } else if (!docUnsigned.exist) {
-          console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
-          await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
-          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
-        } else if (docUnsigned.exists && docUnsigned.data().status) {
-          console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
-          await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again :) . (owlly-error-003)');
+            //keep that to inform user, that he already signed.
+            //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
+            await sendSuccessMail(attachment.email, docUnsigned.data().given_name);
+          } else if (!docUnsigned.exist) {
+            console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
+            await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
+            await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
+          } else if (docUnsigned.exists && docUnsigned.data().status) {
+            console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
+            await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again :) . (owlly-error-003)');
+          } else {
+            console.error('Strange error, check logs.  (owlly-error-005)');
+            await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
+          }
         } else {
-          console.error('Strange error, check logs.  (owlly-error-005)');
-          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
+          return;
         }
       }
     } else {
