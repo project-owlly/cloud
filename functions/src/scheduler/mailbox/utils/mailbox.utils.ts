@@ -52,19 +52,16 @@ export async function readMailboxPdfs() {
       } else {
         const pdfMetadata: any = await readPdfMetaData(attachment);
 
+        if (pdfMetadata && pdfMetadata.owllyId && pdfMetadata.fileId) {
+        } else {
+          //ERROR!!!
+        }
+
         //Get Temp File from "request" -> should be YES
-        const docUnsigned: FirebaseFirestore.DocumentData = await db.collection('tempfiles').doc(pdfMetadata.tempOwllyDoc).get();
+        const docUnsigned: FirebaseFirestore.DocumentData = await db.collection('tempfiles').doc(pdfMetadata.fileId).get();
 
-        //Check if already a signed File is here? -> should be NO
-        const docSigned: FirebaseFirestore.DocumentData = await db
-          .collection('owlly-admin')
-          .doc(pdfMetadata.owllyId)
-          .collection('signed')
-          .doc(pdfMetadata.eId)
-          .get();
-
-        if (docUnsigned.exists && !docSigned.exists) {
-          //nur falls auch wirklich noch kein signierted vorhanden ist UND ein Request erstellt wurde.
+        if (docUnsigned.exists && !docUnsigned.data().status) {
+          //nur falls auch wirklich noch kein signiertes vorhanden ist UND ein Request erstellt wurde.
           console.log('upload file! ' + attachment.filename);
 
           const importDate = new Date();
@@ -119,6 +116,7 @@ export async function readMailboxPdfs() {
             .doc(docUnsigned.id)
             .set(
               {
+                statusSigned: true,
                 imported: importDate,
                 firebasestorage: signedFileUrl[0],
                 opentimestamps: opentimestampsFileUrl[0],
@@ -141,8 +139,8 @@ export async function readMailboxPdfs() {
         } else if (!docUnsigned.exist) {
           console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
           await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
-          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(docSigned.data()));
-        } else if (docUnsigned.exists && docSigned.exists) {
+          await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
+        } else if (docUnsigned.exists && docUnsigned.data().status) {
           console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
           await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again :) . (owlly-error-003)');
         } else {
