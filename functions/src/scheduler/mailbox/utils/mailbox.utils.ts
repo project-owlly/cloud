@@ -129,9 +129,10 @@ export async function readMailboxPdfs() {
               .doc(pdfMetadata.owllyId)
               .collection(String(postalCode))
               .add({
-                status: 'open',
+                certified: false,
                 postalCode: postalCode,
                 imported: importDate,
+                generated: docUnsigned.data().generated,
                 firebasestorage: signedFileUrl[0],
                 opentimestamps: opentimestampsFileUrl[0],
                 hash: String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0],
