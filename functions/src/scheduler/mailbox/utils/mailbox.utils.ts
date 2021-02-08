@@ -16,7 +16,6 @@ import * as path from 'path';
 import * as os from 'os';
 import {getSignatures} from './parser.utils';
 import {checkRevocation} from './revocation.utils';
-import {exit} from 'process';
 
 /* MAILBOX */
 const config = {
