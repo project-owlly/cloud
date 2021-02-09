@@ -199,13 +199,13 @@ function generatePDFLine(doc: PDFKit.PDFDocument) {
 }
 
 function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
-  doc.rect(35, 490, doc.page.width - 70, 30).fill('#f1f1f1');
+  doc.rect(35, 490, doc.page.width - 70, 25).fill('#f1f1f1'); //Strafbar
 
-  doc.rect(35, 525, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 30).fill('#f1f1f1');
+  doc.rect(35, 520, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 30).fill('#f1f1f1'); //Wortlaut des Begehrens
 
-  doc.rect(35, 550 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1');
+  doc.rect(35, 550 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1'); //Urheber
 
-  doc.rect(35, 725, doc.page.width - 70, 40).fill('#f1f1f1');
+  doc.rect(35, 725, doc.page.width - 70, 40).fill('#f1f1f1'); //Rückzugsklausel
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
@@ -223,7 +223,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
       }
     );
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(6).text('Wortlaut des Begehrens', 45, 530, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(6).text('Wortlaut des Begehrens', 45, 525, {
     align: 'left',
   });
 
@@ -293,10 +293,10 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
 function generatePDFFooter(doc: PDFKit.PDFDocument) {
   const grad2: PDFKit.PDFLinearGradient = doc.linearGradient(0, 0, 592, 150);
   grad2.stop(0, '#81bc4f').stop(1, '#00a6d4');
-  doc.rect(0, 772, doc.page.width, 50);
+  doc.rect(0, 792, doc.page.width, 50);
   doc.fill(grad2);
 
-  doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(9).text('owlly.ch | enabling digital democracy', 0, 792, {
+  doc.fillColor('white').font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`).fontSize(9).text('owlly.ch | enabling digital democracy', 0, 812, {
     align: 'center',
   });
 }
