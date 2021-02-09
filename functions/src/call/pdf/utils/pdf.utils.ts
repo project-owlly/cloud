@@ -205,7 +205,7 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
 
   doc.rect(35, 550 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1'); //Urheber
 
-  doc.rect(35, 725, doc.page.width - 70, 40).fill('#f1f1f1'); //Rückzugsklausel
+  doc.rect(35, 745, doc.page.width - 70, 35).fill('#f1f1f1'); //Rückzugsklausel
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
@@ -235,7 +235,7 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
       align: 'left',
     });
 
-  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(6).text('Rückzugsklausel', 45, 730, {
+  doc.fillColor('#a6a8aa').font(`${process.cwd()}/assets/fonts/Lato-Black.ttf`).fontSize(6).text('Rückzugsklausel', 45, 750, {
     align: 'left',
   });
 }
@@ -281,7 +281,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
       .text(
         'Das Initiativkomitee, bestehend aus den genannten Urheberinnen und Urhebern, ist berechtigt, diese Volksinitiative mit absoluter Mehrheit seiner noch stimmberechtigten Mitglieder zurückzuziehen.',
         45,
-        740,
+        760,
         {
           align: 'left',
           width: doc.page.width - 90,
