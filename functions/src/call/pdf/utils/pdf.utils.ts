@@ -203,9 +203,10 @@ function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
 
   doc.rect(35, 520, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 30).fill('#f1f1f1'); //Wortlaut des Begehrens
 
-  doc.rect(35, 550 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 20).fill('#f1f1f1'); //Urheber
+  //start ab 520 + 30 = 550
+  doc.rect(35, 550 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 30).fill('#f1f1f1'); //Urheber
 
-  doc.rect(35, 745, doc.page.width - 70, 35).fill('#f1f1f1'); //Rückzugsklausel
+  doc.rect(35, 745, doc.page.width - 70, 35).fill('#f1f1f1'); //Rückzugsklausel looks good
 }
 
 function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: any) {
@@ -241,19 +242,6 @@ function generatePDFBeschriftungGraueRechtecke(doc: PDFKit.PDFDocument, data: an
 }
 
 function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
-  /*doc
-    .fillColor('#a6a8aa')
-    .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
-    .fontSize(6)
-    .text(
-      'Wer bei einer Unterschriftensammlung besticht oder sich bestechen lässt oder wer das Ergebnis einer Unterschriftensammlung fälscht, macht sich strafbar nach Art. 281 beziehungsweise nach Art. 282 des Strafgesetzbuches.',
-      45,
-      525,
-      {
-        align: 'left',
-      }
-    );*/
-
   doc
     .fillColor('#a6a8aa')
     .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
@@ -274,6 +262,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
 
   //if Initiative
   if (data.owllyData.type === 'initiative') {
+    //Rückzugsklausel looks ok
     doc
       .fillColor('#a6a8aa')
       .font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`)
@@ -290,6 +279,7 @@ function generatePDFInitiativtexte(doc: PDFKit.PDFDocument, data: any) {
   }
 }
 
+//Footer looks good
 function generatePDFFooter(doc: PDFKit.PDFDocument) {
   const grad2: PDFKit.PDFLinearGradient = doc.linearGradient(0, 0, 592, 150);
   grad2.stop(0, '#81bc4f').stop(1, '#00a6d4');
