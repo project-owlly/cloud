@@ -133,6 +133,8 @@ export async function readMailboxPdfs() {
               firebasestorage: signedFileUrl[0],
               opentimestamps: opentimestampsFileUrl[0],
               hash: hash,
+              eId: pdfMetadata.eId,
+              fileId: pdfMetadata.fileId,
             });
 
             //keep that to inform user, that he already signed.
