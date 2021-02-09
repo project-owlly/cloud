@@ -125,7 +125,7 @@ export async function readMailboxPdfs() {
                 }
               );
 
-            await db.collection('owlly-campaigner').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
+            await db.collection('owlly').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
               certified: false,
               postalCode: postalCode,
               imported: importDate,
