@@ -67,14 +67,14 @@ export async function readMailboxPdfs() {
             await admin
               .storage()
               .bucket()
-              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
+              .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .save(attachment.data);
 
             //GET LINK
             const signedFileUrl = await admin
               .storage()
               .bucket()
-              .file('signed/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
+              .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .getSignedUrl({
                 action: 'read',
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
@@ -93,20 +93,21 @@ export async function readMailboxPdfs() {
             await admin
               .storage()
               .bucket()
-              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
+              .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .save(fileOts);
 
             //GET SIGNED URL LINK from TIMESTAMPED FILE
             const opentimestampsFileUrl = await admin
               .storage()
               .bucket()
-              .file('opentimestamps/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
+              .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
               .getSignedUrl({
                 action: 'read',
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
               });
 
             //SAVE Signed document URL entry in DB under Tempfiles
+            // TODO THIS CAN BE DELETED -> WE DO IT ANYWAY FURTHER DOWN
             const hash = String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0];
             await db
               .collection('tempfiles')
@@ -125,6 +126,7 @@ export async function readMailboxPdfs() {
                 }
               );
 
+            // SAVE to POSTALCODE
             await db.collection('owlly').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
               certified: false,
               postalCode: postalCode,
