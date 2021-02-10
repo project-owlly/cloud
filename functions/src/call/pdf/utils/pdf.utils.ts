@@ -201,9 +201,9 @@ function generatePDFLine(doc: PDFKit.PDFDocument) {
 function generatePDFGraueRechteckeUnten(doc: PDFKit.PDFDocument, data: any) {
   doc.rect(35, 490, doc.page.width - 70, 25).fill('#f1f1f1'); //Strafbar
 
-  doc.rect(35, 520, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 35).fill('#f1f1f1'); //Wortlaut des Begehrens
+  doc.rect(35, 520, doc.page.width - 70, doc.heightOfString(data.owllyData.text) + 40).fill('#f1f1f1'); //Wortlaut des Begehrens
 
-  doc.rect(35, 555 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 35).fill('#f1f1f1'); //Urheber
+  doc.rect(35, 555 + doc.heightOfString(data.owllyData.text) + 10, doc.page.width - 70, doc.heightOfString(data.owllyData.author) + 25).fill('#f1f1f1'); //Urheber
 
   doc.rect(35, 745, doc.page.width - 70, 35).fill('#f1f1f1'); //Rückzugsklausel looks good
 }
