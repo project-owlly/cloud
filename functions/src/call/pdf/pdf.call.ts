@@ -33,6 +33,11 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
 
   //SAVE FILE to Download later
 
+  //clean up userData
+  delete data.userData['picture'];
+  delete data.userData['sub'];
+  delete data.userData['verified_simple'];
+
   // Make entry in DB
   const tempOwllyDoc = await db.collection('tempfiles').add({
     generated: new Date(),
@@ -41,6 +46,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     owllyId: owllyId,
     eId: eId,
     filename: data.owllyData.filename,
+    data: data.userData, //TOOD: Hash IT?
   });
 
   // Create a temp id..

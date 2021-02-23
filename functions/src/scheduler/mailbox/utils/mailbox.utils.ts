@@ -106,8 +106,8 @@ export async function readMailboxPdfs() {
                 expires: '2099-12-31', //TODO: CHANGE THIS!!!!
               });
 
-            //SAVE Signed document URL entry in DB under Tempfiles
-            // TODO THIS CAN BE DELETED -> WE DO IT ANYWAY FURTHER DOWN
+            // SAVE Signed document URL entry in DB under Tempfiles
+            // TODO THIS CAN BE DELETED -> WE DO IT ANYWAY FURTHER DOWN and we delete it later
             const hash = String(infoResult).split('File sha256 hash: ')[1].split('Timestamp:')[0];
             await db
               .collection('tempfiles')
@@ -137,6 +137,7 @@ export async function readMailboxPdfs() {
               hash: hash,
               eId: pdfMetadata.eId,
               fileId: pdfMetadata.fileId,
+              data: docUnsigned.data().data,
             });
 
             //keep that to inform user, that he already signed.
