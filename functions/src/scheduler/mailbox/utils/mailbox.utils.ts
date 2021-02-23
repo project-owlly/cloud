@@ -1,7 +1,5 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-//import * as imaps from 'imap-simple';
-//import {ImapSimple} from 'imap-simple'
 
 var imaps = require('imap-simple');
 const OpenTimestamps = require('opentimestamps');

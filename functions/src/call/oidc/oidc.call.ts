@@ -42,7 +42,7 @@ export async function callOidcAuthUrl(data: OidcAuthDataRequest, context: Callab
     return undefined;
   }
 
-  const scope: string = 'openid given_name family_name birth_date street_address postal_code locality verified_simple';
+  const scope: string = 'openid given_name family_name birth_date street_address postal_code locality email verified_simple';
 
   const oidAuth = await generateOidcAuthUrl(scope, {
     type: 'wizard',
