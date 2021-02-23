@@ -47,7 +47,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     eId: eId,
     filename: data.owllyData.filename,
     data: data.userData, //TOOD: Hash IT?
-    email: data.userData['email'],
+    email: data.userData['email'] || '',
   });
 
   // Create a temp id..
