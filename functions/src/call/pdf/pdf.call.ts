@@ -49,6 +49,15 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     data: data.userData, //TOOD: Hash IT?
     email: data.userData['email'] || '',
   });
+  const increment = admin.firestore.FieldValue.increment(1);
+  await db.collection('owlly').doc(owllyId).set(
+    {
+      owllyCreated: increment,
+    },
+    {
+      merge: true,
+    }
+  );
 
   // Create a temp id..
   // File only valid some hours..

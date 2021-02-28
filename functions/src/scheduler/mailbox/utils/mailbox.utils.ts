@@ -151,6 +151,16 @@ export async function readMailboxPdfs() {
               },
             ]);
 
+            const increment = admin.firestore.FieldValue.increment(1);
+            await db.collection('owlly').doc(pdfMetadata.owllyId).set(
+              {
+                owllySigned: increment,
+              },
+              {
+                merge: true,
+              }
+            );
+
             //Delete temp file & db entry
             await admin
               .storage()
