@@ -125,7 +125,7 @@ export async function readMailboxPdfs() {
               );
 
             // SAVE to POSTALCODE
-            await db.collection('owlly').doc(pdfMetadata.owllyId).collection(String(postalCode)).add({
+            await db.collection('owlly').doc(pdfMetadata.owllyId).collection('postalcode').doc(String(postalCode)).collection('files').add({
               certified: false,
               postalCode: postalCode,
               imported: importDate,
