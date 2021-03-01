@@ -248,11 +248,12 @@ async function readMailbox(): Promise<MailData[] | null> {
           });
 
         //console.log('attachmentPart: ' + JSON.stringify(attachmentPart));
+
         if (attachmentPart.length <= 0) {
           console.log('No matching attachment in email found (owlly-error-001)');
           await sendErrorMail(
-            message.parts[0].body.from[0].split('<')[1].split('>')[0],
-            message.parts[0].body.from[0].split('<')[0],
+            message.parts[0].body.from[0].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi)[0],
+            message.parts[0].body.from[0].split(' ')[0],
             'No matching attachment in email found (owlly-error-001)'
           );
         } else {
@@ -261,8 +262,8 @@ async function readMailbox(): Promise<MailData[] | null> {
           const attachment: MailData = {
             filename: attachmentPart[0].disposition.params.filename,
             data: partData,
-            from: message.parts[0].body.from[0].split('<')[0],
-            email: message.parts[0].body.from[0].split('<')[1].split('>')[0],
+            from: message.parts[0].body.from[0].split(' ')[0],
+            email: message.parts[0].body.from[0].match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi)[0],
           };
 
           attachments = attachments.concat(attachment);
@@ -274,12 +275,12 @@ async function readMailbox(): Promise<MailData[] | null> {
 
         //await connection.moveMessage(String(message.attributes.uid), 'Deleted');
       } catch (err) {
-        console.error('General attachment error (owlly-error-002) ' + JSON.stringify(err.message));
-        await sendErrorMail(
-          message.parts[0].body.from[0].split('<')[1].split('>')[0],
-          message.parts[0].body.from[0].split('<')[0],
-          'General attachment error (owlly-error-002)'
-        );
+        console.error('General attachment error (owlly-error-001) ' + JSON.stringify(err.message));
+
+        console.log('Email dump from: ' + JSON.stringify(message.parts[0].body.from));
+        console.log('Email dump body: ' + JSON.stringify(message.parts[0].body));
+
+        await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-001)', 'General attachment error (owlly-error-001)');
       }
     }
 
@@ -384,7 +385,11 @@ async function readPdfMetaData(data: MailData): Promise<any | null> {
   const eId: string | null = await extractEid(pdf);
   const fileId: string | null = await extractFileId(pdf);
 
-  return {owllyId: owllyId, eId: eId, fileId: fileId};
+  return {
+    owllyId: owllyId,
+    eId: eId,
+    fileId: fileId,
+  };
 }
 
 /*
