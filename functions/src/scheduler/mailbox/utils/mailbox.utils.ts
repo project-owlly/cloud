@@ -179,18 +179,35 @@ export async function readMailboxPdfs() {
               .bucket()
               .file('tempfiles/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
               .delete();
-
             await db.collection('tempfiles').doc(docUnsigned.id).delete();
           } else if (!allreadySigned.empty) {
+            // THIS MEANS, THIS USER SIGNED ALREADY THIS INITIATIVE -> THerefore we have an entry in /owllyid/postalcode/8200/files
             console.log(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
             await sendinboxSuccessAlready(attachment.email, attachment.from);
+
+            //Delete file
+            await admin
+              .storage()
+              .bucket()
+              .file('tempfiles/' + pdfMetadata.fileId, {})
+              .delete();
+            await db.collection('tempfiles').doc(pdfMetadata.fileId).delete();
           } else if (!docUnsigned.exist) {
             console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
             await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
             await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
           } else if (docUnsigned.exists && docUnsigned.data().statusSigned) {
+            //THIS MEANS, WE HAVE A TEMP FILE. SHOULD NOT OCCUR.
             console.log(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
+            console.log('THIS SHOULD NOT OCCUR???? CHECK in LOGS');
             await sendinboxSuccessAlready(attachment.email, attachment.from);
+            //Delete file
+            await admin
+              .storage()
+              .bucket()
+              .file('tempfiles/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
+              .delete();
+            await db.collection('tempfiles').doc(docUnsigned.id).delete();
           } else {
             console.error('Strange error, check logs.  (owlly-error-005)');
             await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
