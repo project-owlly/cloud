@@ -151,8 +151,18 @@ export async function readMailboxPdfs() {
               },
             ]);
 
+            //counter on initiative
             const increment = admin.firestore.FieldValue.increment(1);
             await db.collection('owlly').doc(pdfMetadata.owllyId).set(
+              {
+                owllySigned: increment,
+              },
+              {
+                merge: true,
+              }
+            );
+            //counter on postalcode
+            await db.collection('owlly').doc(pdfMetadata.owllyId).collection('postalcode').doc(String(postalCode)).set(
               {
                 owllySigned: increment,
               },
