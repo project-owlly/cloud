@@ -7,7 +7,7 @@ export async function readTempFiles() {
   let tempfiles = await db
     .collection('tempfiles')
     .where('statusReminder', '==', false)
-    .where('generated', '<', Date.now() - 1000 * 60 * 60)
+    //.where('generated', '<', Date.now() - 1000 * 60 * 60)
     .get();
   tempfiles.forEach(async (file) => {
     //GET LINK

@@ -43,6 +43,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     generated: new Date(),
     postalcode: data.userData.postal_code,
     statusSigned: false,
+    statusReminder: false,
     owllyId: owllyId,
     eId: eId,
     filename: data.owllyData.filename,
@@ -60,7 +61,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   );
   await db.collection('owlly').doc(owllyId).collection('postalcode').doc(String(data.userData.postal_code)).set(
     {
-      owllySigned: increment,
+      owllyCreated: increment,
     },
     {
       merge: true,
