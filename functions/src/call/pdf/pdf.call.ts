@@ -58,6 +58,14 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       merge: true,
     }
   );
+  await db.collection('owlly').doc(owllyId).collection('postalcode').doc(String(data.userData.postal_code)).set(
+    {
+      owllySigned: increment,
+    },
+    {
+      merge: true,
+    }
+  );
 
   // Create a temp id..
   // File only valid some hours..
