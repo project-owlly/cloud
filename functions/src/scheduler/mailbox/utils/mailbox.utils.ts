@@ -182,15 +182,15 @@ export async function readMailboxPdfs() {
 
             await db.collection('tempfiles').doc(docUnsigned.id).delete();
           } else if (!allreadySigned.empty) {
-            console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
-            await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again :) . (owlly-error-003)');
+            console.log(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
+            await sendinboxSuccessAlready(attachment.email, attachment.from);
           } else if (!docUnsigned.exist) {
             console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
             await sendErrorMail(attachment.email, attachment.from, 'PDF generation error. Please create a new document. (owlly-error-002)');
             await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
           } else if (docUnsigned.exists && docUnsigned.data().statusSigned) {
-            console.error(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
-            await sendErrorMail(attachment.email, attachment.from, 'File already received by owlly. No need to send it again :) . (owlly-error-003)');
+            console.log(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
+            await sendinboxSuccessAlready(attachment.email, attachment.from);
           } else {
             console.error('Strange error, check logs.  (owlly-error-005)');
             await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-004)', 'Strange error, check logs.  (owlly-error-005)');
@@ -427,6 +427,18 @@ function sendSuccessMail(email: string, name: string, hash: string, attachments:
       data: {
         firstName: name,
         hash: hash,
+      },
+    },
+  });
+}
+
+function sendinboxSuccessAlready(email: string, name: string) {
+  return db.collection('mail').add({
+    to: email,
+    template: {
+      name: 'inboxSuccessAlready',
+      data: {
+        firstName: name,
       },
     },
   });
