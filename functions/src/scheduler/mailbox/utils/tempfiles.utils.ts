@@ -10,23 +10,25 @@ export async function readTempFiles() {
     //.where('generated', '<', Date.now() - 1000 * 60 * 60)
     .get();
   tempfiles.forEach(async (file) => {
-    //GET LINK
-    const signedTempfileUrl = await admin
-      .storage()
-      .bucket()
-      .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
-      .getSignedUrl({
-        action: 'read',
-        expires: '2099-12-31', //TODO: CHANGE THIS!!!!
-      });
+    if (file.data().data && file.data().data.email) {
+      //GET LINK
+      const signedTempfileUrl = await admin
+        .storage()
+        .bucket()
+        .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
+        .getSignedUrl({
+          action: 'read',
+          expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+        });
 
-    /*const tempfile = await admin
-      .storage()
-      .bucket()
-      .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
-      .get();*/
+      /*const tempfile = await admin
+        .storage()
+        .bucket()
+        .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
+        .get();*/
 
-    await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0]);
+      await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0]);
+    }
 
     //Todo: DELETE DATA!
     await db.collection('tempfiles').doc(file.id).set(
