@@ -14,19 +14,19 @@ export async function readTempFiles() {
     const signedTempfileUrl = await admin
       .storage()
       .bucket()
-      .file('tempfile/' + file.id + '/' + file.data().filename + '.pdf', {})
+      .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
       .getSignedUrl({
         action: 'read',
         expires: '2099-12-31', //TODO: CHANGE THIS!!!!
       });
 
-    const tempfile = await admin
+    /*const tempfile = await admin
       .storage()
       .bucket()
-      .file('tempfile/' + file.id + '/' + file.data().filename + '.pdf', {})
-      .get();
+      .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
+      .get();*/
 
-    await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0], [tempfile[0]]);
+    await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0]);
 
     //Todo: DELETE DATA!
     await db.collection('tempfiles').doc(file.id).set(
@@ -40,12 +40,12 @@ export async function readTempFiles() {
   });
 }
 
-function sendReminderMail(email: string, name: string, link: string, attachments: any[]) {
+function sendReminderMail(email: string, name: string, link: string) {
   return db.collection('mail').add({
     to: email,
-    message: {
+    /*message: {
       attachments: attachments,
-    },
+    },*/
     template: {
       name: 'sendReminder',
       data: {
