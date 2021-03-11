@@ -1,5 +1,12 @@
 import axios from 'axios';
-import {configuration} from '../../../config/oidc/schaffhausen';
+import {configurationSH} from '../../../config/oidc/schaffhausen';
+import {configurationZG} from '../../../config/oidc/zug';
+
+const config = {
+  sh: configurationSH,
+  zg: configurationZG,
+};
+
 import {defineMessages} from 'react-intl';
 
 const messages = defineMessages({
@@ -14,7 +21,7 @@ const messages = defineMessages({
 });
 
 export async function checkRevocation(sig: any) {
-  const url = configuration.issuer + '/api/internal/revocations';
+  const url = config.sh.issuer + '/api/internal/revocations';
 
   if (!sig.hasOwnProperty('claims')) {
     console.error('Missing claims property, skipping revocation');
