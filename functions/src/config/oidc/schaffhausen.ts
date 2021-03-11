@@ -1,4 +1,4 @@
-export const configuration = {
+export const configurationSH = {
   issuer: 'https://eid.sh.ch',
   authorization_endpoint: 'https://eid.sh.ch/authorize',
   token_endpoint: 'https://eid.sh.ch/token',
@@ -15,3 +15,4 @@ export const configuration = {
   redirect_uri_prod: 'https://owlly.ch/return',
   redirect_uri_app: 'owlly://return',
 };
+//https://eid.sh.ch/.well-known/openid-configuration
