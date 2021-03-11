@@ -1,7 +1,13 @@
 import * as functions from 'firebase-functions';
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 
-import {configuration} from '../../config/oidc/schaffhausen';
+import {configurationSH} from '../../config/oidc/schaffhausen';
+import {configurationZG} from '../../config/oidc/zug';
+
+const config = {
+  sh: configurationSH,
+  zg: configurationZG,
+};
 
 /*** ISSUER ***/
 import {Issuer} from 'openid-client';
@@ -14,6 +20,7 @@ interface OidcAuth {
 
 interface OidcAuthDataRequest {
   owllyId?: string;
+  configuration: 'sh' | 'zg';
 }
 
 interface OidcAuthLoginDataRequest {}
@@ -21,6 +28,7 @@ interface OidcAuthLoginDataRequest {}
 interface OidcState {
   type: 'login' | 'wizard';
   owllyId?: string;
+  configuration: 'sh' | 'zg';
 }
 
 export async function callOidcAuthUrlLogin(_data: OidcAuthLoginDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
@@ -28,6 +36,7 @@ export async function callOidcAuthUrlLogin(_data: OidcAuthLoginDataRequest, cont
 
   const oidAuth: Partial<OidcAuth> = await generateOidcAuthUrl(scope, {
     type: 'login',
+    configuration: 'sh',
   });
 
   return {
@@ -37,6 +46,7 @@ export async function callOidcAuthUrlLogin(_data: OidcAuthLoginDataRequest, cont
 
 export async function callOidcAuthUrl(data: OidcAuthDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
   const owllyId: string | undefined = data.owllyId;
+  const configuration = data.configuration;
 
   if (!owllyId) {
     return undefined;
@@ -47,6 +57,7 @@ export async function callOidcAuthUrl(data: OidcAuthDataRequest, context: Callab
   const oidAuth = await generateOidcAuthUrl(scope, {
     type: 'wizard',
     owllyId,
+    configuration,
   });
 
   return {
@@ -62,16 +73,28 @@ export async function generateOidcAuthUrl(scope: string, state: OidcState): Prom
   //change autodiscovery based on REQUEST.PARAM
 
   //autodiscovery, if system changes
-  const eidIssuer = await Issuer.discover('https://eid.sh.ch');
+  let eidIssuer;
+
+  switch (state.configuration) {
+    case 'sh':
+      eidIssuer = await Issuer.discover('https://eid.sh.ch');
+      break;
+    case 'zg':
+      eidIssuer = await Issuer.discover('https://gateway.ezug.ch');
+      break;
+    default:
+      eidIssuer = await Issuer.discover('https://eid.sh.ch');
+      break;
+  }
 
   /*** CLIENT ***/
   const client = new eidIssuer.Client({
     client_id: functions.config().oidc.user,
     client_secret: functions.config().oidc.pwd,
-    redirect_uris: [configuration.redirect_uri_app, configuration.redirect_uri_prod, configuration.redirect_uri_dev],
+    redirect_uris: [config[state.configuration].redirect_uri_app, config[state.configuration].redirect_uri_prod, config[state.configuration].redirect_uri_dev],
   }); // => Client /////, [keystore]
 
-  const redirect_uri = configuration.redirect_uri_prod;
+  const redirect_uri = config[state.configuration].redirect_uri_prod;
   //const redirect_uri = configuration.redirect_uri_dev;
 
   const authorizationUrl = client.authorizationUrl({

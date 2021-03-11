@@ -1,7 +1,13 @@
 import * as functions from 'firebase-functions';
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 
-import {configuration} from '../../config/oidc/schaffhausen';
+import {configurationSH} from '../../config/oidc/schaffhausen';
+import {configurationZG} from '../../config/oidc/zug';
+
+const config = {
+  sh: configurationSH,
+  zg: configurationZG,
+};
 
 import * as axios from 'axios';
 import * as FormData from 'form-data';
@@ -15,6 +21,7 @@ interface EidLogin {
 
 interface EidDataRequest {
   authorization_code: string;
+  configuration: 'sh' | 'zg';
 }
 
 export async function callEidLogin(data: EidDataRequest, context: CallableContext): Promise<string | undefined> {
@@ -34,17 +41,17 @@ export async function callEidData(data: EidDataRequest, context: CallableContext
     return undefined;
   }
 
-  return await getEidUserData(eidToken.access_token);
+  return await getEidUserData(eidToken.access_token, data.configuration);
 }
 
 async function postEidLogin(data: EidDataRequest): Promise<EidLogin | undefined> {
   const form = new FormData();
   form.append('code', data.authorization_code);
   form.append('grant_type', 'authorization_code');
-  form.append('redirect_uri', configuration.redirect_uri_prod);
+  form.append('redirect_uri', config[data.configuration].redirect_uri_prod);
 
   try {
-    const tokenData: axios.AxiosResponse<EidLogin> = await axios.default.post<EidLogin>(configuration.token_endpoint, form, {
+    const tokenData: axios.AxiosResponse<EidLogin> = await axios.default.post<EidLogin>(config[data.configuration].token_endpoint, form, {
       headers: {
         Authorization: 'Basic ' + Buffer.from(functions.config().oidc.user + ':' + functions.config().oidc.pwd).toString('base64'),
         ...form.getHeaders(),
@@ -58,9 +65,9 @@ async function postEidLogin(data: EidDataRequest): Promise<EidLogin | undefined>
   }
 }
 
-async function getEidUserData(accessToken: string): Promise<EidUserData | undefined> {
+async function getEidUserData(accessToken: string, configuration: 'sh' | 'zg'): Promise<EidUserData | undefined> {
   try {
-    const userData: axios.AxiosResponse<EidUserData> = await axios.default.get(configuration.userinfo_endpoint, {
+    const userData: axios.AxiosResponse<EidUserData> = await axios.default.get(config[configuration].userinfo_endpoint, {
       headers: {
         Authorization: 'Bearer ' + accessToken,
       },
