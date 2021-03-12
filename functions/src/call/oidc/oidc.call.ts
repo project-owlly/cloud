@@ -97,6 +97,7 @@ export async function generateOidcAuthUrl(scope: string, state: OidcState): Prom
   const redirect_uri = config[state.configuration].redirect_uri_prod;
   //const redirect_uri = configuration.redirect_uri_dev;
 
+  console.log('state' + JSON.stringify(state));
   const authorizationUrl = client.authorizationUrl({
     state: encodeURI(JSON.stringify(state)),
     redirect_uri: redirect_uri,
