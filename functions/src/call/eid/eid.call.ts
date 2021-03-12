@@ -35,7 +35,7 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
-  console.log(data);
+  //console.log(data);
 
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
@@ -53,9 +53,20 @@ async function postEidToken(data: EidDataRequest): Promise<EidLogin | undefined>
   form.append('redirect_uri', config[data.configuration].redirect_uri_prod);
 
   try {
+    let basicString = '';
+    switch (data.configuration) {
+      case 'sh':
+        basicString = Buffer.from(functions.config().oidc.user.sh + ':' + functions.config().oidc.pwd.sh).toString('base64');
+        break;
+
+      case 'zg':
+        basicString = Buffer.from(functions.config().oidc.user.zg + ':' + functions.config().oidc.pwd.zg).toString('base64');
+        break;
+    }
+
     const tokenData: axios.AxiosResponse<EidLogin> = await axios.default.post<EidLogin>(config[data.configuration].token_endpoint, form, {
       headers: {
-        Authorization: 'Basic ' + Buffer.from(functions.config().oidc.user + ':' + functions.config().oidc.pwd).toString('base64'),
+        Authorization: 'Basic ' + basicString,
         ...form.getHeaders(),
       },
     });
