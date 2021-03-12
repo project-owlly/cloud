@@ -75,29 +75,55 @@ export async function generateOidcAuthUrl(scope: string, state: OidcState): Prom
   //autodiscovery, if system changes
   let eidIssuer;
 
+  let client;
+
   switch (state.configuration) {
     case 'sh':
       eidIssuer = await Issuer.discover('https://eid.sh.ch');
+      client = new eidIssuer.Client({
+        client_id: functions.config().oidc.user.sh,
+        client_secret: functions.config().oidc.pwd.sh,
+        redirect_uris: [
+          config[state.configuration].redirect_uri_app,
+          config[state.configuration].redirect_uri_prod,
+          config[state.configuration].redirect_uri_dev,
+        ],
+      }); // => Client /////, [keystore]
+
       break;
     case 'zg':
       eidIssuer = await Issuer.discover('https://gateway.ezug.ch');
+      client = new eidIssuer.Client({
+        client_id: functions.config().oidc.user.zg,
+        client_secret: functions.config().oidc.pwd.zg,
+        redirect_uris: [
+          config[state.configuration].redirect_uri_app,
+          config[state.configuration].redirect_uri_prod,
+          config[state.configuration].redirect_uri_dev,
+        ],
+      }); // => Client /////, [keystore]
       break;
     default:
       eidIssuer = await Issuer.discover('https://eid.sh.ch');
+      client = new eidIssuer.Client({
+        client_id: functions.config().oidc.user.sh,
+        client_secret: functions.config().oidc.pwd.sh,
+        redirect_uris: [config.sh.redirect_uri_app, config.sh.redirect_uri_prod, config.sh.redirect_uri_dev],
+      }); // => Client /////, [keystore]
       break;
   }
 
-  /*** CLIENT ***/
-  const client = new eidIssuer.Client({
-    client_id: functions.config().oidc.user,
-    client_secret: functions.config().oidc.pwd,
+  /*const client = new eidIssuer.Client({
+    client_id: functions.config().oidc.user.sh,
+    client_secret: functions.config().oidc.pwd.sh,
     redirect_uris: [config[state.configuration].redirect_uri_app, config[state.configuration].redirect_uri_prod, config[state.configuration].redirect_uri_dev],
   }); // => Client /////, [keystore]
+  */
 
   const redirect_uri = config[state.configuration].redirect_uri_prod;
   //const redirect_uri = configuration.redirect_uri_dev;
 
-  console.log('state' + JSON.stringify(state));
+  //console.log('state' + JSON.stringify(state));
   const authorizationUrl = client.authorizationUrl({
     state: encodeURI(JSON.stringify(state)),
     redirect_uri: redirect_uri,
