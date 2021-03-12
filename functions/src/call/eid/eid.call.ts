@@ -25,7 +25,7 @@ interface EidDataRequest {
 }
 
 export async function callEidLogin(data: EidDataRequest, context: CallableContext): Promise<string | undefined> {
-  const eidToken: EidLogin | undefined = await postEidLogin(data);
+  const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
     return undefined;
@@ -35,7 +35,7 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
-  const eidToken: EidLogin | undefined = await postEidLogin(data);
+  const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
     return undefined;
@@ -44,7 +44,7 @@ export async function callEidData(data: EidDataRequest, context: CallableContext
   return await getEidUserData(eidToken.access_token, data.configuration);
 }
 
-async function postEidLogin(data: EidDataRequest): Promise<EidLogin | undefined> {
+async function postEidToken(data: EidDataRequest): Promise<EidLogin | undefined> {
   const form = new FormData();
   form.append('code', data.authorization_code);
   form.append('grant_type', 'authorization_code');
