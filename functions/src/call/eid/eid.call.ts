@@ -35,6 +35,8 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
+  console.log(data);
+
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
