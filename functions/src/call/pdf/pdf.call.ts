@@ -6,6 +6,7 @@ import {generatePDFDoc} from './utils/pdf.utils';
 const crypto = require('crypto');
 
 const db = admin.firestore();
+db.settings({ignoreUndefinedProperties: true});
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
