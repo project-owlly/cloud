@@ -41,7 +41,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   // Make entry in DB
   const tempOwllyDoc = await db.collection('tempfiles').add({
     generated: new Date(),
-    postalcode: data.userData.postal_code,
+    postalcode: data.userData.postal_code || '0000',
     statusSigned: false,
     statusReminder: false,
     owllyId: owllyId,
