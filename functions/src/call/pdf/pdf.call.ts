@@ -112,10 +112,12 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   });
 
   /*Skribble*/
-  await loginSkribble();
+  let token = await loginSkribble();
+  console.log('Skribble Token: ' + token);
   const file = await owllyPDF.download({});
-  const signatureRequest = await createSignatureRequest(file[0].toString('base64'));
-  const signedFile = await downloadSignedPdf(signatureRequest.id);
+  const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token);
+  console.log('Skribble Token: ' + signatureRequest);
+  const signedFile = await downloadSignedPdf(signatureRequest.id, token);
 
   //SAVE SKRIBBLE FILE TO FIREBASE STORAGE
   await admin

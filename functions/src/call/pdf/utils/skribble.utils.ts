@@ -16,13 +16,15 @@ export async function loginSkribble(): Promise<any> {
   axios(config)
     .then(function (response: any) {
       console.log(JSON.stringify(response.data));
+
+      return response.data;
     })
     .catch(function (error: any) {
       console.log(error);
     });
 }
 
-export async function createSignatureRequest(base64Document: string): Promise<any> {
+export async function createSignatureRequest(base64Document: string, token: string): Promise<any> {
   var data = JSON.stringify({
     title: 'Example contract',
     message: 'Please sign this document!',
@@ -39,6 +41,7 @@ export async function createSignatureRequest(base64Document: string): Promise<an
     url: 'https://api.skribble.com/v1/signature-requests',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
     },
     data: data,
   };
@@ -64,13 +67,15 @@ export async function createSignatureRequest(base64Document: string): Promise<an
     });
 }
 
-export async function downloadSignedPdf(signatureRequest: string): Promise<any> {
+export async function downloadSignedPdf(signatureRequest: string, token: string): Promise<any> {
   const documentId = getDocumentIdFromSignaturegRequest(signatureRequest);
 
   var config = {
     method: 'get',
     url: 'https://api.skribble.com/v1/documents/' + documentId + '/content',
-    headers: {},
+    headers: {
+      Authorization: 'Bearer ' + token,
+    },
   };
 
   axios(config)
