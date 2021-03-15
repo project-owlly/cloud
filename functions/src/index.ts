@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import 'firebase-functions/lib/logger/compat';
 
+import {callbackError, callbackSuccess, callbackUpdate} from './request/skribble/skribble.callbacks';
 import {getOwlly} from './request/owlly/owlly.get';
 import {callGeneratePdfUrl} from './call/pdf/pdf.call';
 
@@ -19,6 +20,9 @@ import {authUserCreate, authUserCreateSendWelcomeMail, authUserCreateSendVerifyM
 
 // HTTP Requests (EXTERNAL) - Internal = from App should be onCall..
 export const owlly = functions.region('europe-west6').https.onRequest(getOwlly);
+export const skribbleCallbackSuccess = functions.region('europe-west6').https.onRequest(callbackSuccess);
+export const skribbleCallbackUpdate = functions.region('europe-west6').https.onRequest(callbackUpdate);
+export const skribbleCallbackError = functions.region('europe-west6').https.onRequest(callbackError);
 
 // scheduler (Mailbox, Cleanup Documents)
 export const mailboxScheduler = functions.region('europe-west6').pubsub.schedule('every 30 minutes').onRun(readMailbox);

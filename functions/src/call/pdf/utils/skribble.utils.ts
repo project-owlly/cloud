@@ -39,6 +39,14 @@ export async function createSignatureRequest(fileUrl: string, token: string, tit
     quality: 'QES',
     legislation: 'ZERTES',
     write_access: ['sandro.scalco@liitu.ch'],
+
+    callback_success_url:
+      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackSuccess?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=12345678',
+    callback_update_url:
+      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackUpdate?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=12345678',
+    callback_error_url:
+      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackError?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=12345678',
+
     signatures: [
       {
         signer_email_address: email,
