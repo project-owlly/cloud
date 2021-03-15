@@ -2,6 +2,7 @@ import {CallableContext} from 'firebase-functions/lib/providers/https';
 import * as admin from 'firebase-admin';
 
 import {generatePDFDoc} from './utils/pdf.utils';
+import {createSignatureRequest, loginSkribble} from './utils/skribble.utils';
 
 const crypto = require('crypto');
 
@@ -15,6 +16,11 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
 }
 
 export async function callGeneratePdfUrl(data: any, context: CallableContext): Promise<any | undefined> {
+  let statusOwlly: boolean = true;
+  let statusOTS: boolean = true;
+  let statusSkribble: boolean = true;
+  let signingUrl: string = '';
+
   const owllyId: string | undefined = data.owllyId;
   const hash = crypto.createHash('sha256');
   const eId: string = hash.update(data.userData.sub).digest('hex'); // data.userData.sub;
@@ -110,7 +116,56 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     //contentType: 'application/pdf',
   });
 
+  /*Skribble*/
+  if (data.userData.configuration === 'zg') {
+    let token = await loginSkribble();
+    console.log('Skribble Token: ' + token);
+
+    //const file = await owllyPDF.download({});
+    //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
+
+    signingUrl = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '');
+
+    //console.log('signatureRequest: ' + JSON.stringify(signatureRequest));
+
+    /*
+    const signedFile = await downloadSignedPdf(signatureRequest, token);
+    console.log('signedFileFromSkribble here');
+  
+  
+    //SAVE SKRIBBLE FILE TO FIREBASE STORAGE
+    await admin
+      .storage()
+      .bucket()
+      .file('skribble/' + tempOwllyDoc.id + '/' + data.owllyData.filename + '.pdf', {})
+      .save(signedFile);
+  
+    //GET SIGNED URL LINK from SKRIBBLE FILE
+    const skribbleSignedUrl = await admin
+      .storage()
+      .bucket()
+      .file('skribble/' + tempOwllyDoc.id + '/' + data.owllyData.filename + '.pdf', {})
+      .getSignedUrl({
+        action: 'read',
+        expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+      });
+      */
+  } else {
+    statusSkribble = false;
+  }
+
   return {
     url: signedURL[0],
+    message: '',
+    status: {
+      owlly: statusOwlly,
+      ots: statusOTS,
+      skribble: statusSkribble,
+    },
+    skribble: {
+      //signatureRequest: signatureRequest,
+      //documentId: signatureRequest.document_id,
+      skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinnish%2F' + owllyId + '&redirectTimeout=90&hidedownload=true',
+    },
   };
 }
