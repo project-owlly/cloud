@@ -2,7 +2,7 @@ import {CallableContext} from 'firebase-functions/lib/providers/https';
 import * as admin from 'firebase-admin';
 
 import {generatePDFDoc} from './utils/pdf.utils';
-import {createSignatureRequest, downloadSignedPdf, loginSkribble} from './utils/skribble.utils';
+import {createSignatureRequest, loginSkribble} from './utils/skribble.utils';
 
 const crypto = require('crypto');
 
@@ -116,13 +116,17 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   let token = await loginSkribble();
   console.log('Skribble Token: ' + token);
 
-  const file = await owllyPDF.download({});
-  const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
+  //const file = await owllyPDF.download({});
+  //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
+
+  const signatureRequest = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '');
 
   console.log('signatureRequest: ' + JSON.stringify(signatureRequest));
-  const signedFile = await downloadSignedPdf(signatureRequest, token);
 
+  /*
+  const signedFile = await downloadSignedPdf(signatureRequest, token);
   console.log('signedFileFromSkribble here');
+
 
   //SAVE SKRIBBLE FILE TO FIREBASE STORAGE
   await admin
@@ -140,6 +144,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       action: 'read',
       expires: '2099-12-31', //TODO: CHANGE THIS!!!!
     });
+    */
 
   return {
     url: signedURL[0],
@@ -150,10 +155,9 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       skribble: true,
     },
     skribble: {
-      signatureRequest: signatureRequest,
-      documentId: signatureRequest.document_id,
-      skribbleSignedUrl: skribbleSignedUrl,
-      skribbleSigning_url: signatureRequest.signing_url,
+      //signatureRequest: signatureRequest,
+      //documentId: signatureRequest.document_id,
+      skribbleSigningUrl: signatureRequest.signing_url + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinnish%2F' + owllyId + '&redirectTimeout=90&hidedownload=true ',
     },
   };
 }

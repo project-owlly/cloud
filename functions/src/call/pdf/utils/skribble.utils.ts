@@ -30,15 +30,19 @@ export async function loginSkribble(): Promise<any> {
    });*/
 }
 
-export async function createSignatureRequest(base64Document: string, token: string, title: string, email: string): Promise<any> {
+export async function createSignatureRequest(fileUrl: string, token: string, title: string, email: string): Promise<any> {
   var data = JSON.stringify({
-    title: title,
-    message: 'Please sign this document!',
-    content: base64Document,
-    write_access: ['sandro.scalco@liitu.ch', email],
+    title: 'E-Collecting mit owlly: ' + title,
+    message: 'Bitte unterschreibe dieses Volksbegehren',
+    //content: base64Document,
+    file_url: fileUrl,
+    quality: 'QES',
+    legislation: 'ZERTES',
+    write_access: ['sandro.scalco@liitu.ch'],
     signatures: [
       {
         signer_email_address: email,
+        notify: false,
       },
     ],
   });

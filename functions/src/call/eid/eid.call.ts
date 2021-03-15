@@ -86,7 +86,11 @@ async function getEidUserData(accessToken: string, configuration: 'sh' | 'zg'): 
       },
     });
 
-    return userData.data;
+    let object: any = {};
+    object = userData;
+    object.configuration = configuration;
+
+    return object;
   } catch (err) {
     console.error(err);
     return undefined;
