@@ -2,6 +2,7 @@ import {CallableContext} from 'firebase-functions/lib/providers/https';
 import * as admin from 'firebase-admin';
 
 import {generatePDFDoc} from './utils/pdf.utils';
+import {createSignatureRequest, downloadSignedPdf, loginSkribble} from './utils/skribble.utils';
 
 const crypto = require('crypto');
 
@@ -110,7 +111,35 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     //contentType: 'application/pdf',
   });
 
+  /*Skribble*/
+  await loginSkribble();
+  const file = await owllyPDF.download({});
+  const signatureRequest = await createSignatureRequest(file[0].toString('base64'));
+  const signedFile = await downloadSignedPdf(signatureRequest.id);
+
+  //SAVE SKRIBBLE FILE TO FIREBASE STORAGE
+  await admin
+    .storage()
+    .bucket()
+    .file('skribble/' + tempOwllyDoc.id + '/' + data.owllyData.filename + '.pdf', {})
+    .save(signedFile);
+
+  //GET SIGNED URL LINK from SKRIBBLE FILE
+  const skribbleSignedUrl = await admin
+    .storage()
+    .bucket()
+    .file('skribble/' + tempOwllyDoc.id + '/' + data.owllyData.filename + '.pdf', {})
+    .getSignedUrl({
+      action: 'read',
+      expires: '2099-12-31', //TODO: CHANGE THIS!!!!
+    });
+
   return {
     url: signedURL[0],
+    skribble: {
+      signatureRequest: signatureRequest,
+      documentId: signatureRequest.document_id,
+      skribbleSignedUrl: skribbleSignedUrl,
+    },
   };
 }
