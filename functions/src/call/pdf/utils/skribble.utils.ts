@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 var axios = require('axios');
 
 export async function loginSkribble(): Promise<any> {
-  var data = '{\r\n    "username": "' + functions.config().skribble.username + '",\r\n    "api-key": "' + functions.config().skribble.apikey + '",\r\n}';
+  var data = '{"username": "' + functions.config().skribble.username + '","api-key": "' + functions.config().skribble.apikey + '"}';
 
   var config = {
     method: 'post',
@@ -12,26 +12,33 @@ export async function loginSkribble(): Promise<any> {
     },
     data: data,
   };
+  try {
+    let response = await axios(config);
+    return response.data.toString();
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
 
-  axios(config)
-    .then(function (response: any) {
-      console.log(JSON.stringify(response.data));
+  /* .then(function (response: any) {
+     console.log(JSON.stringify(response.data));
 
-      return response.data;
-    })
-    .catch(function (error: any) {
-      console.log(error);
-    });
+     return response.data.toString();
+   })
+   .catch(function (error: any) {
+     console.log(error);
+   });*/
 }
 
-export async function createSignatureRequest(base64Document: string, token: string): Promise<any> {
+export async function createSignatureRequest(base64Document: string, token: string, title: string, email: string): Promise<any> {
   var data = JSON.stringify({
-    title: 'Example contract',
+    title: title,
     message: 'Please sign this document!',
-    content: '{{base64Document}}',
+    content: base64Document,
+    write_access: ['sandro.scalco@liitu.ch', email],
     signatures: [
       {
-        signer_email_address: 'hi@owlly.ch',
+        signer_email_address: email,
       },
     ],
   });
@@ -46,11 +53,15 @@ export async function createSignatureRequest(base64Document: string, token: stri
     data: data,
   };
 
-  axios(config)
-    .then(function (response: any) {
-      console.log(JSON.stringify(response.data));
+  try {
+    let response = await axios(config);
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
 
-      /*
+  /*
   {
     "id": "dddddddd-ab69-4b50-c174-ffffffffffffff",
     "title": "Example contract",
@@ -58,60 +69,42 @@ export async function createSignatureRequest(base64Document: string, token: stri
     "document_id": "99999999-0101-0202-7744-a829913fccf5",
     ...
 }*/
-
-      return response.data;
-    })
-    .catch(function (error: any) {
-      console.log(error);
-      return false;
-    });
 }
 
-export async function downloadSignedPdf(signatureRequest: string, token: string): Promise<any> {
-  const documentId = getDocumentIdFromSignaturegRequest(signatureRequest);
+export async function downloadSignedPdf(signatureRequest: any, token: string): Promise<any> {
+  const documentId = await getDocumentIdFromSignaturegRequest(signatureRequest.id, token);
+  console.log('skribble documentId from SignatureRequest: ' + documentId);
 
   var config = {
     method: 'get',
-    url: 'https://api.skribble.com/v1/documents/' + documentId + '/content',
+    url: 'https://api.skribble.com/v1/documents/' + signatureRequest.document_id + '/content',
+    headers: {
+      Authorization: 'Bearer ' + token,
+    },
+  };
+  try {
+    const response = await axios(config);
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+async function getDocumentIdFromSignaturegRequest(signatureRequestId: string, token: string) {
+  var config = {
+    method: 'get',
+    url: 'https://api.skribble.com/v1/signature-requests/' + signatureRequestId,
     headers: {
       Authorization: 'Bearer ' + token,
     },
   };
 
-  axios(config)
-    .then(function (response: any) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error: any) {
-      console.log(error);
-    });
-}
-
-function getDocumentIdFromSignaturegRequest(signatureRequest: string) {
-  var config = {
-    method: 'get',
-    url: 'https://api.skribble.com/v1/signature-requests/' + signatureRequest,
-    headers: {},
-  };
-
-  axios(config)
-    .then(function (response: any) {
-      console.log(JSON.stringify(response.data));
-      return response.data.document_id;
-
-      /*
-{
-  "id": "cccccccc-4a6a-a958-a42e-6ea4172a378b",
-  "title": "Example contract",
-  "message": "Please sign this document!",
-  "document_id": "d98ae06a-3ae4-5cc5-c0a3-62b05901b84f",
-  ...
-}
-*/
-    })
-    .catch(function (error: any) {
-      console.log(error);
-    });
-
-  return 'documentId';
+  try {
+    let response = await axios(config);
+    return response.data.document_id;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
 }

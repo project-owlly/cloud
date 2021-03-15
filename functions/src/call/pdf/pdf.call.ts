@@ -112,12 +112,17 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   });
 
   /*Skribble*/
+
   let token = await loginSkribble();
   console.log('Skribble Token: ' + token);
+
   const file = await owllyPDF.download({});
-  const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token);
-  console.log('Skribble Token: ' + signatureRequest);
-  const signedFile = await downloadSignedPdf(signatureRequest.id, token);
+  const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
+
+  console.log('signatureRequest: ' + JSON.stringify(signatureRequest));
+  const signedFile = await downloadSignedPdf(signatureRequest, token);
+
+  console.log('signedFileFromSkribble here');
 
   //SAVE SKRIBBLE FILE TO FIREBASE STORAGE
   await admin
@@ -138,10 +143,17 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
 
   return {
     url: signedURL[0],
+    message: '',
+    status: {
+      owlly: true,
+      ots: true,
+      skribble: true,
+    },
     skribble: {
       signatureRequest: signatureRequest,
       documentId: signatureRequest.document_id,
       skribbleSignedUrl: skribbleSignedUrl,
+      skribbleSigning_url: signatureRequest.signing_url,
     },
   };
 }
