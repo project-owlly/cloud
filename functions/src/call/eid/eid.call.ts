@@ -35,13 +35,14 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
-  //console.log(data);
+  console.log('LOG: ' + JSON.stringify(data));
 
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
     return undefined;
   }
+  console.log('LOG: ' + eidToken.access_token);
 
   return await getEidUserData(eidToken.access_token, data.configuration);
 }
@@ -63,7 +64,6 @@ async function postEidToken(data: EidDataRequest): Promise<EidLogin | undefined>
         basicString = Buffer.from(functions.config().oidc.user.zg + ':' + functions.config().oidc.pwd.zg).toString('base64');
         break;
     }
-
     const tokenData: axios.AxiosResponse<EidLogin> = await axios.default.post<EidLogin>(config[data.configuration].token_endpoint, form, {
       headers: {
         Authorization: 'Basic ' + basicString,
@@ -73,6 +73,7 @@ async function postEidToken(data: EidDataRequest): Promise<EidLogin | undefined>
 
     return tokenData.data;
   } catch (err) {
+    console.log('Token error');
     console.error(err);
     return undefined;
   }
@@ -91,6 +92,7 @@ async function getEidUserData(accessToken: string, configuration: 'sh' | 'zg'): 
     object.configuration = configuration;
 
     return object;
+    //return userData;
   } catch (err) {
     console.error(err);
     return undefined;
