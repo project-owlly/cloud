@@ -59,7 +59,7 @@ export async function createSignatureRequest(fileUrl: string, token: string, tit
 
   try {
     let response = await axios(config);
-    return response.data;
+    return response.data.signing_url;
   } catch (e) {
     console.log(e);
     return false;
