@@ -24,7 +24,7 @@ export async function readTempFiles() {
       if (file.data().skribble) {
         await sendReminderMail(file.data().data.email, file.data().data.given_name, file.data().skribbleSignedUrl);
       } else {
-        await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0]);
+        await sendReminderMail(file.data().data.email, file.data().data.given_name, signedTempfileUrl[0]);
       }
 
       /*const tempfile = await admin
