@@ -119,12 +119,12 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   /*Skribble*/
   if (data.userData.configuration === 'zg') {
     let token = await loginSkribble();
-    console.log('Skribble Token: ' + token);
+    //console.log('Skribble Token: ' + token);
 
     //const file = await owllyPDF.download({});
     //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
 
-    signingUrl = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '');
+    signingUrl = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '', tempOwllyDoc.id);
 
     //console.log('signatureRequest: ' + JSON.stringify(signatureRequest));
 
@@ -165,7 +165,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     skribble: {
       //signatureRequest: signatureRequest,
       //documentId: signatureRequest.document_id,
-      skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinnish%2F' + owllyId + '&redirectTimeout=90&hidedownload=true',
+      skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F' + owllyId + '&redirectTimeout=10&hidedownload=true',
     },
   };
 }

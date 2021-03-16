@@ -9,6 +9,7 @@ const config = {
   zg: configurationZG,
 };
 
+//var axios = require('axios');
 import * as axios from 'axios';
 import * as FormData from 'form-data';
 
@@ -25,6 +26,9 @@ interface EidDataRequest {
 }
 
 export async function callEidLogin(data: EidDataRequest, context: CallableContext): Promise<string | undefined> {
+  //console.log('callEidLogin');
+  //console.log('data from request: ' + JSON.stringify(data));
+
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
@@ -35,65 +39,65 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
-  console.log('LOG post data: ' + JSON.stringify(data));
+  //console.log('callEidData');
+  //console.log('1. data from request authorization_code: ' + JSON.stringify(data.authorization_code));
+  //console.log('1. data from request configuration: ' + JSON.stringify(data.configuration));
 
+  //console.log('2. get access token with auth_code: ' + JSON.stringify(data.authorization_code));
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
     return undefined;
   }
-  console.log('LOG access_token: ' + eidToken.access_token);
 
+  //console.log('3. GET UserData with Access Token: ' + eidToken.access_token);
   return await getEidUserData(eidToken.access_token, data.configuration);
 }
 
 async function postEidToken(data: EidDataRequest): Promise<EidLogin | undefined> {
-  const form = new FormData();
+  var form = new FormData();
   form.append('code', data.authorization_code);
   form.append('grant_type', 'authorization_code');
   form.append('redirect_uri', config[data.configuration].redirect_uri_prod);
 
+  let axiosConfig: any = {
+    method: 'post',
+    url: config[data.configuration].token_endpoint,
+    headers: {
+      Authorization:
+        'Basic ' + Buffer.from(functions.config().oidc.user[data.configuration] + ':' + functions.config().oidc.pwd[data.configuration]).toString('base64'),
+      ...form.getHeaders(),
+    },
+    data: form,
+  };
+
   try {
-    let basicString = '';
-    switch (data.configuration) {
-      case 'sh':
-        basicString = Buffer.from(functions.config().oidc.user.sh + ':' + functions.config().oidc.pwd.sh).toString('base64');
-        break;
-
-      case 'zg':
-        basicString = Buffer.from(functions.config().oidc.user.zg + ':' + functions.config().oidc.pwd.zg).toString('base64');
-        break;
-    }
-    const tokenData: axios.AxiosResponse<EidLogin> = await axios.default.post<EidLogin>(config[data.configuration].token_endpoint, form, {
-      headers: {
-        Authorization: 'Basic ' + basicString,
-        ...form.getHeaders(),
-      },
-    });
-
-    return tokenData.data;
-  } catch (err) {
+    const response: any = await axios.default(axiosConfig);
+    return response.data;
+  } catch (e) {
     console.log('Token error');
-    console.error(err);
+    console.error(e);
     return undefined;
   }
 }
 
 async function getEidUserData(accessToken: string, configuration: 'sh' | 'zg'): Promise<EidUserData | undefined> {
+  var axiosConfig: any = {
+    method: 'get',
+    url: config[configuration].userinfo_endpoint,
+    headers: {
+      Authorization: 'Bearer ' + accessToken,
+    },
+  };
+
   try {
-    const userData: axios.AxiosResponse<EidUserData> = await axios.default.get(config[configuration].userinfo_endpoint, {
-      headers: {
-        Authorization: 'Bearer ' + accessToken,
-      },
-    });
-
+    const response = await axios.default(axiosConfig);
     let object: any = {};
-    object = userData;
+    object = response.data;
     object.configuration = configuration;
-
     return object;
-    //return userData;
   } catch (err) {
+    console.log('userinfo_endpoint error');
     console.error(err);
     return undefined;
   }
