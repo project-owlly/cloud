@@ -11,7 +11,7 @@ export async function readTempFiles() {
     .get();
   tempfiles.forEach(async (file) => {
     if (file.data().data && file.data().data.email) {
-      //GET LINK
+      //GET LINK to File
       const signedTempfileUrl = await admin
         .storage()
         .bucket()
@@ -21,13 +21,17 @@ export async function readTempFiles() {
           expires: '2099-12-31', //TODO: CHANGE THIS!!!!
         });
 
+      if (file.data().skribble) {
+        await sendReminderMail(file.data().data.email, file.data().data.given_name, file.data().skribbleSignedUrl);
+      } else {
+        await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0]);
+      }
+
       /*const tempfile = await admin
         .storage()
         .bucket()
         .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
         .get();*/
-
-      await sendReminderMail(file.data().email, file.data().data.given_name, signedTempfileUrl[0]);
     }
 
     //Todo: DELETE DATA!

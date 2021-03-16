@@ -48,7 +48,7 @@ export async function readMailboxPdfs() {
         console.error('>>> >>> revocation issue  (owlly-error-010)');
         await sendErrorMail(attachment.email, attachment.from, 'File not signed by valid eID+. (owlly-error-010)');
       } else {
-        const pdfMetadata: any = await readPdfMetaData(attachment);
+        const pdfMetadata: any = await readPdfMetaData(attachment.data, attachment.filename);
 
         if (pdfMetadata && pdfMetadata.owllyId && pdfMetadata.fileId) {
           //Get Temp File from "request" -> should be YES
@@ -388,15 +388,15 @@ function extractFileId(pdf: string): Promise<string | null> {
   });
 }
 
-async function writeFile(data: MailData): Promise<string> {
-  const output: string = path.join(os.tmpdir(), data.filename);
-  await fs.writeFile(output, data.data, 'utf8');
+async function writeFile(data: Buffer, filename: string): Promise<string> {
+  const output: string = path.join(os.tmpdir(), filename);
+  await fs.writeFile(output, data, 'utf8');
 
   return output;
 }
 
-async function readPdfMetaData(data: MailData): Promise<any | null> {
-  const pdf: string = await writeFile(data);
+async function readPdfMetaData(data: Buffer, filename: string): Promise<any | null> {
+  const pdf: string = await writeFile(data, filename);
 
   const owllyId: string | null = await extractOwllyId(pdf);
   const eId: string | null = await extractEid(pdf);

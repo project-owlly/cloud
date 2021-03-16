@@ -45,17 +45,19 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   delete data.userData['sub'];
   delete data.userData['verified_simple'];
 
+  const postalcode = data.userData.postal_code || '0000';
+
   // Make entry in DB
   const tempOwllyDoc = await db.collection('tempfiles').add({
     generated: new Date(),
-    postalcode: data.userData.postal_code || '0000',
+    postalcode: postalcode,
     statusSigned: false,
     statusReminder: false,
     owllyId: owllyId,
     eId: eId,
     filename: data.owllyData.filename,
     data: data.userData, //TOOD: Hash IT?
-    email: data.userData['email'] || '',
+    email: data.userData['email'] || '', //TODO: could be removed? we have it in userdata
   });
   const increment = admin.firestore.FieldValue.increment(1);
   await db.collection('owlly').doc(owllyId).set(
@@ -66,7 +68,8 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       merge: true,
     }
   );
-  await db.collection('owlly').doc(owllyId).collection('postalcode').doc(String(data.userData.postal_code)).set(
+
+  await db.collection('owlly').doc(owllyId).collection('postalcode').doc(String(postalcode)).set(
     {
       owllyCreated: increment,
     },
@@ -112,8 +115,6 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   const signedURL = await owllyPDF.getSignedUrl({
     action: 'read',
     expires: Date.now() + 1000 * 60 * 60 * 10, // always a valid date now
-    //responseType: 'application/pdf',
-    //contentType: 'application/pdf',
   });
 
   /*Skribble*/
@@ -125,6 +126,16 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
 
     signingUrl = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '', tempOwllyDoc.id);
+
+    await db.collection('tempfiles').doc(tempOwllyDoc.id).set(
+      {
+        skribble: true,
+        skribbleSigningUrl: signingUrl,
+      },
+      {
+        merge: true,
+      }
+    );
 
     //console.log('signatureRequest: ' + JSON.stringify(signatureRequest));
 

@@ -86,13 +86,13 @@ export async function createSignatureRequest(fileUrl: string, token: string, tit
 }*/
 }
 
-export async function downloadSignedPdf(signatureRequest: any, token: string): Promise<any> {
-  const documentId = await getDocumentIdFromSignaturegRequest(signatureRequest.id, token);
+export async function downloadSignedPdf(documentId: string, token: string): Promise<any> {
+  //const documentId = await getDocumentIdFromSignaturegRequest(signatureRequest.id, token);
   console.log('skribble documentId from SignatureRequest: ' + documentId);
 
   var config = {
     method: 'get',
-    url: 'https://api.skribble.com/v1/documents/' + signatureRequest.document_id + '/content',
+    url: 'https://api.skribble.com/v1/documents/' + documentId + '/content',
     headers: {
       Authorization: 'Bearer ' + token,
     },
@@ -106,7 +106,7 @@ export async function downloadSignedPdf(signatureRequest: any, token: string): P
   }
 }
 
-async function getDocumentIdFromSignaturegRequest(signatureRequestId: string, token: string) {
+export async function getSignatureRequest(signatureRequestId: string, token: string): Promise<any> {
   var config = {
     method: 'get',
     url: 'https://api.skribble.com/v1/signature-requests/' + signatureRequestId,
@@ -117,7 +117,7 @@ async function getDocumentIdFromSignaturegRequest(signatureRequestId: string, to
 
   try {
     let response = await axios(config);
-    return response.data.document_id;
+    return response.data;
   } catch (e) {
     console.error(e);
     return false;

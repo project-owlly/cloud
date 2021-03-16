@@ -9,7 +9,7 @@ import * as cors from 'cors';
 import {Owlly} from '../../types/owlly';
 import {RequestError} from '../../types/request.error';
 
-admin.initializeApp(functions.config().firebase);
+//admin.initializeApp(functions.config().firebase);
 
 const db = admin.firestore();
 
@@ -20,7 +20,6 @@ export function getOwlly(request: functions.Request, response: functions.Respons
 
   corsHandler(request, response, async () => {
     try {
-
       const snapshot = await db.collection('owlly').get();
 
       if (snapshot.empty) {
@@ -33,7 +32,6 @@ export function getOwlly(request: functions.Request, response: functions.Respons
           id: doc.id,
           data: doc.data(),
         } as Owlly;
-
       });
 
       response.json(results);
