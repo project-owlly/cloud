@@ -30,10 +30,10 @@ export async function loginSkribble(): Promise<any> {
    });*/
 }
 
-export async function createSignatureRequest(fileUrl: string, token: string, title: string, email: string): Promise<any> {
+export async function createSignatureRequest(fileUrl: string, token: string, title: string, email: string, tempFileId: string): Promise<any> {
   var data = JSON.stringify({
     title: 'E-Collecting mit owlly: ' + title,
-    message: 'Bitte unterschreibe dieses Volksbegehren',
+    message: 'Bitte unterschreibe dieses Volksbegehren mit Skribble',
     //content: base64Document,
     file_url: fileUrl,
     quality: 'QES',
@@ -41,11 +41,14 @@ export async function createSignatureRequest(fileUrl: string, token: string, tit
     write_access: ['sandro.scalco@liitu.ch'],
 
     callback_success_url:
-      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackSuccess?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=12345678',
+      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackSuccess?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=' +
+      tempFileId,
     callback_update_url:
-      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackUpdate?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=12345678',
+      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackUpdate?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=' +
+      tempFileId,
     callback_error_url:
-      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackError?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=12345678',
+      'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackError?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=' +
+      tempFileId,
 
     signatures: [
       {

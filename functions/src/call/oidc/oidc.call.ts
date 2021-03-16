@@ -72,12 +72,12 @@ export async function callOidcAuthUrl(data: OidcAuthDataRequest, context: Callab
 export async function generateOidcAuthUrl(scope: string, state: OidcState): Promise<Partial<OidcAuth>> {
   //change autodiscovery based on REQUEST.PARAM
 
-  console.log('generateOidcAuthUrl');
-  console.log('configuration: ' + state.configuration);
-  console.log(
+  //console.log('generateOidcAuthUrl');
+  //console.log('configuration: ' + state.configuration);
+  /*console.log(
     'redirect urls: ' +
       [config[state.configuration].redirect_uri_app, config[state.configuration].redirect_uri_prod, config[state.configuration].redirect_uri_dev].toString()
-  );
+  );*/
 
   const eidIssuer = await Issuer.discover(config[state.configuration].issuer);
   const client = new eidIssuer.Client({

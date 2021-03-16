@@ -26,8 +26,8 @@ interface EidDataRequest {
 }
 
 export async function callEidLogin(data: EidDataRequest, context: CallableContext): Promise<string | undefined> {
-  console.log('callEidLogin');
-  console.log('data from request: ' + JSON.stringify(data));
+  //console.log('callEidLogin');
+  //console.log('data from request: ' + JSON.stringify(data));
 
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
@@ -39,18 +39,18 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
-  console.log('callEidData');
-  console.log('1. data from request authorization_code: ' + JSON.stringify(data.authorization_code));
-  console.log('1. data from request configuration: ' + JSON.stringify(data.configuration));
+  //console.log('callEidData');
+  //console.log('1. data from request authorization_code: ' + JSON.stringify(data.authorization_code));
+  //console.log('1. data from request configuration: ' + JSON.stringify(data.configuration));
 
-  console.log('2. get access token with auth_code: ' + JSON.stringify(data.authorization_code));
+  //console.log('2. get access token with auth_code: ' + JSON.stringify(data.authorization_code));
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
     return undefined;
   }
 
-  console.log('3. GET UserData with Access Token: ' + eidToken.access_token);
+  //console.log('3. GET UserData with Access Token: ' + eidToken.access_token);
   return await getEidUserData(eidToken.access_token, data.configuration);
 }
 
