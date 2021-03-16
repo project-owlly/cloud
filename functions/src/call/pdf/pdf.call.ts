@@ -165,7 +165,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     skribble: {
       //signatureRequest: signatureRequest,
       //documentId: signatureRequest.document_id,
-      skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinnish%2F' + owllyId + '&redirectTimeout=90&hidedownload=true',
+      skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F' + owllyId + '&redirectTimeout=10&hidedownload=true',
     },
   };
 }
