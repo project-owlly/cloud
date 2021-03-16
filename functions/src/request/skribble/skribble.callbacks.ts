@@ -135,7 +135,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
           await sendSuccessMail(
             signatureRequest.signatures[0].signer_email_address,
-            docUnsigned.data().given_name + ' ' + docUnsigned.data().family_name,
+            docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name,
             hash,
             [
               {
@@ -181,7 +181,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           console.log(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
           await sendinboxSuccessAlready(
             signatureRequest.signatures[0].signer_email_address,
-            docUnsigned.data().given_name + ' ' + docUnsigned.data().family_name
+            docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name
           );
 
           //Delete file
@@ -195,7 +195,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
           await sendErrorMail(
             signatureRequest.signatures[0].signer_email_address,
-            docUnsigned.data().given_name + ' ' + docUnsigned.data().family_name,
+            docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name
             'PDF generation error. Please create a new document. (owlly-error-002)'
           );
           await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
