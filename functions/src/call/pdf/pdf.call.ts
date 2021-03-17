@@ -118,7 +118,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   });
 
   /*Skribble*/
-  if (data.userData.configuration === 'zg') {
+  if (data.userData.configuration === 'zg' || data.userData.configuration === 'sh') {
     let token = await loginSkribble();
     //console.log('Skribble Token: ' + token);
 
@@ -131,6 +131,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       {
         skribble: true,
         skribbleSigningUrl: signingUrl,
+        firebasestorage: signedURL[0],
       },
       {
         merge: true,
@@ -162,17 +163,29 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       });
       */
   } else {
+    // THIS CASE IS NOT USED ANYMORE. Sign with SKRIBBLE ANYWAY!
+    await db.collection('tempfiles').doc(tempOwllyDoc.id).set(
+      {
+        skribble: false,
+        firebasestorage: signedURL[0],
+      },
+      {
+        merge: true,
+      }
+    );
     statusSkribble = false;
   }
 
   return {
     url: signedURL[0],
     message: '',
+    configuration: data.userData.configuration,
     status: {
       owlly: statusOwlly,
       ots: statusOTS,
       skribble: statusSkribble,
     },
+    skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F' + owllyId + '&redirectTimeout=10&hidedownload=true',
     skribble: {
       //signatureRequest: signatureRequest,
       //documentId: signatureRequest.document_id,

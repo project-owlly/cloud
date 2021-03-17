@@ -28,12 +28,11 @@ export function callbackSuccess(request: functions.Request, response: functions.
       if (!tempFile || !document_id || !signature_request) {
         response.end();
       }
-
       const token = await loginSkribble();
-      const document = await downloadSignedPdf(document_id, token);
       const signatureRequest = await getSignatureRequest(signature_request, token);
+      const document = await downloadSignedPdf(document_id, token);
 
-      const pdfMetadata: any = await readPdfMetaData(document, 'dummyfilename.pdf'); //TODO: check this?
+      const pdfMetadata: any = await readPdfMetaData(document, signatureRequest.title + '_signiert.pdf'); //TODO: check this?
 
       if (pdfMetadata && pdfMetadata.owllyId && pdfMetadata.fileId) {
         //Get Temp File from "request" -> should be YES
@@ -52,7 +51,9 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .storage()
             .bucket()
             .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
-            .save(document);
+            .save(document, {
+              contentType: 'application/pdf',
+            });
 
           //GET LINK
           const signedFileUrl = await admin
@@ -64,22 +65,17 @@ export function callbackSuccess(request: functions.Request, response: functions.
               expires: '2099-12-31', //TODO: CHANGE THIS!!!!
             });
 
-          const file = await admin
-            .storage()
-            .bucket()
-            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
-            .download();
-
-          // TIMESTAMP MAGIC
-          //FILE = attachment.data
-          const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file[0].buffer);
+          const file = Buffer.from(document, 'binary');
+          const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
           const infoResult = OpenTimestamps.info(detached);
 
           //TIMESTAMP
+
           await OpenTimestamps.stamp(detached);
           const fileOts = detached.serializeToBytes();
 
           //SAVE TIMESTAMPED FILE TO FIREBASE STORAGE
+
           await admin
             .storage()
             .bucket()
@@ -176,6 +172,8 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .file('tempfiles/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
             .delete();
           await db.collection('tempfiles').doc(docUnsigned.id).delete();
+
+          response.end();
         } else if (!allreadySigned.empty) {
           // THIS MEANS, THIS USER SIGNED ALREADY THIS INITIATIVE -> THerefore we have an entry in /owllyid/postalcode/8200/files
           console.log(pdfMetadata.owllyId + ' already signed by ' + pdfMetadata.eId + '(owlly-error-003)');
@@ -195,7 +193,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           console.error('someone is doing strange stuff? No request (= no plain pdf was generated for this user) exists. (owlly-error-002)');
           await sendErrorMail(
             signatureRequest.signatures[0].signer_email_address,
-            docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name
+            docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name,
             'PDF generation error. Please create a new document. (owlly-error-002)'
           );
           await sendErrorMail('hi@owlly.ch', 'owlly IT-Department (owlly-error-002)', JSON.stringify(pdfMetadata));
@@ -205,7 +203,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           console.log('THIS SHOULD NOT OCCUR???? CHECK in LOGS');
           await sendinboxSuccessAlready(
             signatureRequest.signatures[0].signer_email_address,
-            docUnsigned.data().given_name + ' ' + docUnsigned.data().family_name
+            docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name
           );
           //Delete file
           await admin

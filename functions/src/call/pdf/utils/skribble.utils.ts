@@ -87,15 +87,13 @@ export async function createSignatureRequest(fileUrl: string, token: string, tit
 }
 
 export async function downloadSignedPdf(documentId: string, token: string): Promise<any> {
-  //const documentId = await getDocumentIdFromSignaturegRequest(signatureRequest.id, token);
-  console.log('skribble documentId from SignatureRequest: ' + documentId);
-
-  var config = {
+  let config = {
     method: 'get',
     url: 'https://api.skribble.com/v1/documents/' + documentId + '/content',
     headers: {
       Authorization: 'Bearer ' + token,
     },
+    responseType: 'arraybuffer',
   };
   try {
     const response = await axios(config);
@@ -123,3 +121,9 @@ export async function getSignatureRequest(signatureRequestId: string, token: str
     return false;
   }
 }
+/*
+function sleep(ms:any) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}  */

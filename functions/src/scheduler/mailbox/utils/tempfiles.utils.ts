@@ -10,21 +10,11 @@ export async function readTempFiles() {
     //.where('generated', '<', Date.now() - 1000 * 60 * 60)
     .get();
   tempfiles.forEach(async (file) => {
-    if (file.data().data && file.data().data.email) {
-      //GET LINK to File
-      const signedTempfileUrl = await admin
-        .storage()
-        .bucket()
-        .file('tempfiles/' + file.id + '/' + file.data().filename + '.pdf', {})
-        .getSignedUrl({
-          action: 'read',
-          expires: '2099-12-31', //TODO: CHANGE THIS!!!!
-        });
-
+    if (file.exists && file.data().data && file.data().data.email) {
       if (file.data().skribble) {
-        await sendReminderMail(file.data().data.email, file.data().data.given_name, file.data().skribbleSignedUrl);
+        await sendReminderMail(file.data().data.email, file.data().data.given_name, file.data().skribbleSigningUrl);
       } else {
-        await sendReminderMail(file.data().data.email, file.data().data.given_name, signedTempfileUrl[0]);
+        await sendReminderMail(file.data().data.email, file.data().data.given_name, file.data().firebasestorage);
       }
 
       /*const tempfile = await admin
@@ -43,6 +33,17 @@ export async function readTempFiles() {
         merge: true,
       }
     );
+
+    //Todo: DELETE DATA!?? check this,.. we do a clean up if we receive the file!!!
+    /*
+    await db.collection('tempfiles').doc(file.id).delete();
+    await admin
+    .storage()
+    .bucket()
+    .file('tempfiles/' + file.id + file.data().filename + '.pdf', {}).delete();
+    */
+
+    //TODO: Clean up "old" entries
   });
 }
 
