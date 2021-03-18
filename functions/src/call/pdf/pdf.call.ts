@@ -120,7 +120,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   /*Skribble*/
   if (data.userData.configuration === 'zg' || data.userData.configuration === 'sh') {
     let token = await loginSkribble();
-    console.log('Skribble Token: ' + token);
+    //    console.log('Skribble Token: ' + token);
 
     //const file = await owllyPDF.download({});
     //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
