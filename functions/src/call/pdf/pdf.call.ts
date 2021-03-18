@@ -19,7 +19,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   let statusOwlly: boolean = true;
   let statusOTS: boolean = true;
   let statusSkribble: boolean = true;
-  let signingUrl: string = '';
+  let skribbleSigningUrl: string = '';
 
   const owllyId: string | undefined = data.owllyId;
   const hash = crypto.createHash('sha256');
@@ -120,17 +120,19 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   /*Skribble*/
   if (data.userData.configuration === 'zg' || data.userData.configuration === 'sh') {
     let token = await loginSkribble();
-    //console.log('Skribble Token: ' + token);
+    console.log('Skribble Token: ' + token);
 
     //const file = await owllyPDF.download({});
     //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
 
-    signingUrl = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '', tempOwllyDoc.id);
+    const signatureRequest = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData['email'] || '', tempOwllyDoc.id);
+
+    skribbleSigningUrl = signatureRequest.signing_url + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F' + owllyId + '&redirectTimeout=10&hidedownload=true';
 
     await db.collection('tempfiles').doc(tempOwllyDoc.id).set(
       {
         skribble: true,
-        skribbleSigningUrl: signingUrl,
+        skribbleSigningUrl: skribbleSigningUrl,
         firebasestorage: signedURL[0],
       },
       {
@@ -167,6 +169,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     await db.collection('tempfiles').doc(tempOwllyDoc.id).set(
       {
         skribble: false,
+        skribbleSigningUrl: '',
         firebasestorage: signedURL[0],
       },
       {
@@ -185,6 +188,6 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
       ots: statusOTS,
       skribble: statusSkribble,
     },
-    skribbleSigningUrl: signingUrl + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F' + owllyId + '&redirectTimeout=10&hidedownload=true',
+    skribbleSigningUrl: skribbleSigningUrl,
   };
 }
