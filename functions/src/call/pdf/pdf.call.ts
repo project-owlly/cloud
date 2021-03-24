@@ -7,7 +7,7 @@ import {createSignatureRequest, loginSkribble} from './utils/skribble.utils';
 const crypto = require('crypto');
 
 const db = admin.firestore();
-db.settings({ignoreUndefinedProperties: true});
+//db.settings({ignoreUndefinedProperties: true});
 
 interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
@@ -27,7 +27,32 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
 
   if (!owllyId) {
     return {
-      error: 'OwllyId not provided',
+      url: '',
+      message: 'Owlly not provided',
+      configuration: data.userData.configuration,
+      status: {
+        owlly: false,
+        ots: false,
+        skribble: false,
+      },
+      skribbleSigningUrl: '',
+    };
+  }
+
+  //check already signed
+  const allreadySigned = await db.collectionGroup('files').where('eId', '==', eId).where('owllyId', '==', owllyId).get();
+  if (!allreadySigned.empty) {
+    //schon untercshrieben.
+    return {
+      url: '',
+      message: 'Already signed',
+      configuration: data.userData.configuration,
+      status: {
+        owlly: false,
+        ots: false,
+        skribble: false,
+      },
+      skribbleSigningUrl: '',
     };
   }
 
