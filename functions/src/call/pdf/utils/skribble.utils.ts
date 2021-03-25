@@ -19,21 +19,30 @@ export async function loginSkribble(): Promise<any> {
     console.error(e);
     return false;
   }
-
-  /* .then(function (response: any) {
-     console.log(JSON.stringify(response.data));
-
-     return response.data.toString();
-   })
-   .catch(function (error: any) {
-     console.log(error);
-   });*/
 }
 
 export async function deleteDocument(documentId: string, token: string) {
   var config = {
     method: 'delete',
     url: 'https://api.skribble.com/v1/documents/' + documentId,
+    headers: {
+      Authorization: 'Bearer ' + token,
+    },
+  };
+
+  try {
+    let response = await axios(config);
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+export async function deleteSignatureRequest(signatureRequestId: string, token: string) {
+  var config = {
+    method: 'delete',
+    url: 'https://api.skribble.com/v1/signature-requests/' + signatureRequestId,
     headers: {
       Authorization: 'Bearer ' + token,
     },
@@ -56,7 +65,7 @@ export async function createSignatureRequest(fileUrl: string, token: string, tit
     file_url: fileUrl,
     quality: 'QES',
     legislation: 'ZERTES',
-    write_access: ['sandro.scalco@liitu.ch'],
+    //write_access: ['sandro.scalco@liitu.ch'],
 
     callback_success_url:
       'https://europe-west6-project-owlly.cloudfunctions.net/skribbleCallbackSuccess?signature_request=SKRIBBLE_SIGNATURE_REQUEST_ID&document_id=SKRIBBLE_DOCUMENT_ID&token=' +
