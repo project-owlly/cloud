@@ -150,7 +150,14 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     //const file = await owllyPDF.download({});
     //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
 
-    const signatureRequest = await createSignatureRequest(signedURL[0], token, data.owllyData.title, data.userData.email, tempOwllyDoc.id);
+    const signatureRequest = await createSignatureRequest(
+      signedURL[0],
+      token,
+      data.owllyData.title,
+      data.userData.email,
+      tempOwllyDoc.id,
+      data.userData.given_name
+    );
 
     skribbleSigningUrl = signatureRequest.signing_url + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F' + owllyId + '&redirectTimeout=10&hidedownload=true';
 

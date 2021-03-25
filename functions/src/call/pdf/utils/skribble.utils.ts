@@ -57,10 +57,17 @@ export async function deleteSignatureRequest(signatureRequestId: string, token: 
   }
 }
 
-export async function createSignatureRequest(fileUrl: string, token: string, title: string, email: string, tempFileId: string): Promise<any> {
+export async function createSignatureRequest(
+  fileUrl: string,
+  token: string,
+  title: string,
+  email: string,
+  tempFileId: string,
+  firstName: string
+): Promise<any> {
   var data = JSON.stringify({
     title: 'E-Collecting mit owlly: ' + title,
-    message: 'Bitte unterschreibe dieses Volksbegehren mit Skribble',
+    message: `Hallo ${firstName}! Bitte unterschreibe dieses Volksbegehren mit Skribble. Anschliessend wirst du automatisch wieder auf owlly.ch weitergeleitet. Falls etwas nicht funktioniert, erhälst du von uns eine Erinnerungsemail. Wenn alles geklappt hat, dann bestätigen wir dir den Empfang der Unterschrift per E-Mail. Liebe Grüsse dein owlly-Team.`,
     //content: base64Document,
     file_url: fileUrl,
     quality: 'QES',

@@ -140,7 +140,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
               },
               {
                 filename: docUnsigned.data().filename + '.pdf',
-                content: document,
+                content: file,
               },
             ]
           );
