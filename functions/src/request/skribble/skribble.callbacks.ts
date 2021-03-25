@@ -183,7 +183,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           );
 
           //delete document Skribble
-          deleteDocument(document_id, token);
+          await deleteDocument(document_id, token);
 
           //Delete file owlly
           await admin
