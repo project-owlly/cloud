@@ -6,7 +6,7 @@ admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
 import {RequestError} from '../../types/request.error';
-import {downloadSignedPdf, loginSkribble, getSignatureRequest} from '../../call/pdf/utils/skribble.utils';
+import {downloadSignedPdf, loginSkribble, getSignatureRequest, deleteDocument} from '../../call/pdf/utils/skribble.utils';
 import {readPdfMetaData, sendErrorMail, sendinboxSuccessAlready, sendSuccessMail} from './utils/skribble.utils';
 const OpenTimestamps = require('opentimestamps');
 
@@ -182,7 +182,10 @@ export function callbackSuccess(request: functions.Request, response: functions.
             docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name
           );
 
-          //Delete file
+          //delete document Skribble
+          deleteDocument(document_id, token);
+
+          //Delete file owlly
           await admin
             .storage()
             .bucket()

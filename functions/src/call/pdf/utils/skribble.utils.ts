@@ -30,6 +30,24 @@ export async function loginSkribble(): Promise<any> {
    });*/
 }
 
+export async function deleteDocument(documentId: string, token: string) {
+  var config = {
+    method: 'delete',
+    url: 'https://api.skribble.com/v1/documents/' + documentId,
+    headers: {
+      Authorization: 'Bearer ' + token,
+    },
+  };
+
+  try {
+    let response = await axios(config);
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
 export async function createSignatureRequest(fileUrl: string, token: string, title: string, email: string, tempFileId: string): Promise<any> {
   var data = JSON.stringify({
     title: 'E-Collecting mit owlly: ' + title,
