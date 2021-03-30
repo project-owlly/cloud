@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 
 import {configurationSH} from '../../config/oidc/schaffhausen';
@@ -12,6 +13,9 @@ const config = {
 //var axios = require('axios');
 import * as axios from 'axios';
 import * as FormData from 'form-data';
+
+import jwt_decode from 'jwt-decode';
+import {auth} from 'firebase-admin';
 
 interface EidUserData {}
 
@@ -36,8 +40,11 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
   }
 
   console.log('Login Token' + JSON.stringify(eidToken));
+  const decoded: any = jwt_decode(eidToken.id_token);
+  const customtoken = await admin.auth().createCustomToken(decoded.sub);
 
-  return eidToken.id_token;
+  return customtoken;
+  //return eidToken.id_token;
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
