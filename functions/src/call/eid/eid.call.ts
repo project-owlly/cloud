@@ -35,6 +35,8 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
     return undefined;
   }
 
+  console.log('Login Token' + JSON.stringify(eidToken));
+
   return eidToken.id_token;
 }
 
