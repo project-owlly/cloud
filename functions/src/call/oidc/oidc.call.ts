@@ -23,7 +23,9 @@ interface OidcAuthDataRequest {
   configuration: 'sh' | 'zg';
 }
 
-interface OidcAuthLoginDataRequest {}
+interface OidcAuthLoginDataRequest {
+  configuration: 'sh' | 'zg';
+}
 
 interface OidcState {
   type: 'login' | 'wizard';
@@ -31,12 +33,12 @@ interface OidcState {
   configuration: 'sh' | 'zg';
 }
 
-export async function callOidcAuthUrlLogin(_data: OidcAuthLoginDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
+export async function callOidcAuthUrlLogin(data: OidcAuthLoginDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
   const scope: string = 'openid verified_simple';
 
   const oidAuth: Partial<OidcAuth> = await generateOidcAuthUrl(scope, {
     type: 'login',
-    configuration: 'sh',
+    configuration: data.configuration,
   });
 
   return {
