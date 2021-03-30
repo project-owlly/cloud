@@ -15,7 +15,7 @@ import * as axios from 'axios';
 import * as FormData from 'form-data';
 
 import jwt_decode from 'jwt-decode';
-import {auth} from 'firebase-admin';
+//import {auth} from 'firebase-admin';
 
 interface EidUserData {}
 
