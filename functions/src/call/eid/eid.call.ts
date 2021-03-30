@@ -39,9 +39,12 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
     return undefined;
   }
 
-  console.log('Login Token' + JSON.stringify(eidToken));
+  //console.log('Login Token' + JSON.stringify(eidToken));
   const decoded: any = jwt_decode(eidToken.id_token);
-  const customtoken = await admin.auth().createCustomToken(decoded.sub);
+  const customtoken = await admin.auth().createCustomToken(decoded.sub, {
+    admin: true,
+    configuration: data.configuration,
+  });
 
   return customtoken;
   //return eidToken.id_token;
