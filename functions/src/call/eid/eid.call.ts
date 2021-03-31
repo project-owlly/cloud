@@ -38,22 +38,24 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 
   //GET TOKEN FROM EID
   const eidToken: EidLogin | undefined = await postEidToken(data);
-
   if (!eidToken) {
     return undefined;
   }
-
-  //GET USER DATA
-  //const userData: any | undefined = await getEidUserData(eidToken.access_token, data.configuration);
-  //console.log(JSON.stringify(userData));
-
-  //console.log('Login Token' + JSON.stringify(eidToken));
-  //const decoded: any = jwt_decode(eidToken.id_token);
-
   const decoded = jwt.decode(eidToken.id_token);
+  const customtoken = await admin.auth().createCustomToken(decoded.sub, {
+    admin: true,
+    configuration: data.configuration,
+  });
 
-  console.log(JSON.stringify(admin.credential.cert(functions.config())));
+  //TODO: Validate token with public key from eid gateway.
 
+  console.log(JSON.stringify(customtoken));
+  return customtoken;
+  //return eidToken.id_token;
+  /*
+  console.log(JSON.stringify(admin.credential.applicationDefault()));
+  console.log(JSON.stringify(admin.credential.cert(functions.config().firebase)));
+  
   var customtoken = jwt.sign(
     {
       iss: functions.config().client_email,
@@ -67,19 +69,9 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
         configuration: data.configuration,
       },
     },
-    functions.config().credential.privateKey,
+    admin.credential.applicationDefault(),
     {algorithm: 'RS256'}
-  );
-
-  console.log(JSON.stringify(customtoken));
-
-  /*const customtoken = await admin.auth().createCustomToken(decoded.sub, {
-    admin: true,
-    configuration: data.configuration,
-  });*/
-
-  return customtoken;
-  //return eidToken.id_token;
+  );*/
 }
 
 export async function callEidData(data: EidDataRequest, context: CallableContext): Promise<EidUserData | undefined> {
