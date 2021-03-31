@@ -1,4 +1,6 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 
 import {configurationSH} from '../../config/oidc/schaffhausen';
@@ -50,6 +52,8 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 
   const decoded = jwt.decode(eidToken.id_token);
 
+  console.log(JSON.stringify(admin.credential.cert(functions.config())));
+
   var customtoken = jwt.sign(
     {
       iss: functions.config().client_email,
@@ -63,7 +67,7 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
         configuration: data.configuration,
       },
     },
-    functions.config().private_key,
+    functions.config().credential.privateKey,
     {algorithm: 'RS256'}
   );
 
