@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 
 import {configurationSH} from '../../config/oidc/schaffhausen';
@@ -14,7 +13,8 @@ const config = {
 import * as axios from 'axios';
 import * as FormData from 'form-data';
 
-import jwt_decode from 'jwt-decode';
+//import jwt_decode from 'jwt-decode';
+var jwt = require('jsonwebtoken');
 //import {auth} from 'firebase-admin';
 
 interface EidUserData {}
@@ -33,18 +33,45 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
   //console.log('callEidLogin');
   //console.log('data from request: ' + JSON.stringify(data));
 
+  //GET TOKEN FROM EID
   const eidToken: EidLogin | undefined = await postEidToken(data);
 
   if (!eidToken) {
     return undefined;
   }
 
+  //GET USER DATA
+  //const userData: any | undefined = await getEidUserData(eidToken.access_token, data.configuration);
+  //console.log(JSON.stringify(userData));
+
   //console.log('Login Token' + JSON.stringify(eidToken));
-  const decoded: any = jwt_decode(eidToken.id_token);
-  const customtoken = await admin.auth().createCustomToken(decoded.sub, {
+  //const decoded: any = jwt_decode(eidToken.id_token);
+
+  const decoded = jwt.decode(eidToken.id_token);
+
+  var customtoken = jwt.sign(
+    {
+      iss: functions.config().client_email,
+      sub: functions.config().client_email,
+      aud: 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit',
+      iat: decoded.iat,
+      exp: decoded.exp,
+      uid: decoded.sub,
+      claims: {
+        admin: true,
+        configuration: data.configuration,
+      },
+    },
+    functions.config().private_key,
+    {algorithm: 'RS256'}
+  );
+
+  console.log(JSON.stringify(customtoken));
+
+  /*const customtoken = await admin.auth().createCustomToken(decoded.sub, {
     admin: true,
     configuration: data.configuration,
-  });
+  });*/
 
   return customtoken;
   //return eidToken.id_token;
