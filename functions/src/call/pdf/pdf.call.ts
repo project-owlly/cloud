@@ -23,7 +23,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
 
   const owllyId: string | undefined = data.owllyId;
   const hash = crypto.createHash('sha256');
-  const eId: string = hash.update(data.userData.sub).digest('hex'); // data.userData.sub;
+  const eId: string = hash.update(data.userData.configuration === 'sh' ? data.userData.sub : data.userData['zug:login_id']).digest('hex'); // data.userData.sub;
 
   if (!owllyId) {
     return {
