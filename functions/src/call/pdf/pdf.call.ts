@@ -110,6 +110,7 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
     .bucket()
     .file('tempfiles/' + tempOwllyDoc.id + '/' + data.owllyData.filename + '.pdf', {});
 
+  formData.fileId = tempOwllyDoc.id;
   const doc: PDFKit.PDFDocument = await generatePDFDoc(formData);
 
   //doc.pipe(response.status(200));

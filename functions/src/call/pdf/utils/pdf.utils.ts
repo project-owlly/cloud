@@ -26,11 +26,13 @@ export async function generatePDFDoc(data: any): Promise<PDFKit.PDFDocument> {
 
   generatePDFUserDaten(doc, data);
 
-  generatePDFLines(doc);
+  generatePDFLines(doc); //"formular"
 
   generatePDFLinesBeschriftungen(doc);
 
   generatePDFDownloadAufruf(doc);
+
+  generatePDFFileId(doc, data);
 
   generatePDFLine(doc);
 
@@ -192,6 +194,16 @@ function generatePDFDownloadAufruf(doc: PDFKit.PDFDocument) {
   doc.fillColor('#00a6d4').font(`${process.cwd()}/assets/fonts/Lato-Regular.ttf`).fontSize(6).text('briefkasten@owlly.ch', 0, 442, {
     align: 'center',
   });
+}
+
+function generatePDFFileId(doc: PDFKit.PDFDocument, data: any) {
+  doc
+    .fillColor('black')
+    .font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`)
+    .fontSize(6)
+    .text('Nummer für Stimmrechtsbescheinigung: ' + data.fileId, 0, 454, {
+      align: 'center',
+    });
 }
 
 function generatePDFLine(doc: PDFKit.PDFDocument) {
