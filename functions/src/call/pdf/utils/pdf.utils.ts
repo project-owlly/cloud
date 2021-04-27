@@ -201,7 +201,7 @@ function generatePDFFileId(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('black')
     .font(`${process.cwd()}/assets/fonts/Lato-Light.ttf`)
     .fontSize(6)
-    .text('Nummer für Stimmrechtsbescheinigung: ' + data.fileId, 0, 454, {
+    .text('Identifikation für die Stimmrechtsbescheinigung: ' + data.fileId, 0, 454, {
       align: 'center',
     });
 }
