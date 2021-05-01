@@ -6,11 +6,16 @@ export function authUserCreate(user: admin.auth.UserRecord, context: functions.E
   //update
   db.collection('userProfile')
     .doc(`${user.uid}`)
-    .set({
-      email: user.email,
-      id: user.uid,
-      //status: true,
-    })
+    .set(
+      {
+        email: user.email,
+        id: user.uid,
+        //status: true,
+      },
+      {
+        merge: true,
+      }
+    )
     .then((ok) => {
       return 'ok';
     })
