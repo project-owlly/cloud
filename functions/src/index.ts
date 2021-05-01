@@ -3,7 +3,7 @@ import 'firebase-functions/lib/logger/compat';
 
 import {callbackError, callbackSuccess, callbackUpdate} from './request/skribble/skribble.callbacks';
 import {getOwlly} from './request/owlly/owlly.get';
-import {callGeneratePdfUrl} from './call/pdf/pdf.call';
+import {callGeneratePdfUrl, callPDFBescheinigung} from './call/pdf/pdf.call';
 
 import {callOidcAuthUrl, callOidcAuthUrlLogin} from './call/oidc/oidc.call';
 
@@ -36,6 +36,7 @@ export const questionEmail = functions.region('europe-west6').firestore.document
 // onCall +eid Data for PDF
 export const OIDAuthUrl = functions.region('europe-west6').https.onCall(callOidcAuthUrl);
 export const generatePDF = functions.region('europe-west6').https.onCall(callGeneratePdfUrl);
+export const generateBescheinigung = functions.region('europe-west6').https.onCall(callPDFBescheinigung);
 
 // onCall eID+ Login
 export const OIDAuthUrlLogin = functions.region('europe-west6').https.onCall(callOidcAuthUrlLogin);

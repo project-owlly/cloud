@@ -1,7 +1,7 @@
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 import * as admin from 'firebase-admin';
 
-import {generatePDFDoc} from './utils/pdf.utils';
+import {generatePDFDoc, generateBescheinigung} from './utils/pdf.utils';
 import {createSignatureRequest, loginSkribble} from './utils/skribble.utils';
 
 const crypto = require('crypto');
@@ -13,6 +13,78 @@ interface OwllyDocumentInfo extends PDFKit.DocumentInfo {
   OwllyId: string;
   Eid: string;
   FileId: string;
+}
+
+export async function callPDFBescheinigung(data: any, context: CallableContext): Promise<any | undefined> {
+  const authUser: any = await db
+    .collection('users')
+    .doc(context.auth?.uid as string)
+    .get();
+
+  const owllyPDF = admin.storage().bucket().file('bescheinigungen/test.pdf', {});
+
+  const doc: PDFKit.PDFDocument = await generateBescheinigung(['eine ID']);
+
+  //doc.pipe(response.status(200));
+  doc.pipe(
+    owllyPDF.createWriteStream({
+      contentType: 'application/pdf',
+      metadata: {
+        customMetadata: {},
+      },
+    })
+  ); //save to firebase bucket
+
+  // Metadata
+  //(doc.info as OwllyDocumentInfo).OwllyId = "owllyId";
+  (doc.info as OwllyDocumentInfo).Eid = context.auth?.uid as string;
+  (doc.info as OwllyDocumentInfo).FileId = owllyPDF.id as string;
+
+  //Producer MetaData
+  doc.info.Producer = 'Owlly';
+  doc.info.Creator = 'Owlly';
+
+  doc.end();
+
+  const signedURL = await owllyPDF.getSignedUrl({
+    action: 'read',
+    expires: Date.now() + 1000 * 60 * 60 * 10, // always a valid date now
+  });
+
+  let token = await loginSkribble();
+  //    console.log('Skribble Token: ' + token);
+
+  //const file = await owllyPDF.download({});
+  //const signatureRequest = await createSignatureRequest(file[0].toString('base64'), token, data.owllyData.title, data.userData['email'] || '');
+
+  const signatureRequest = await createSignatureRequest(
+    signedURL[0],
+    token,
+    'Gesamtbescheinigung',
+    authUser.data().email as string,
+    owllyPDF.id as string,
+    authUser.data().displayName
+  );
+
+  const skribbleSigningUrl = signatureRequest.signing_url + '?exitURL=https%3A%2F%2Fowlly.ch%2Ffinish%2F&redirectTimeout=10&hidedownload=true';
+
+  await db
+    .collection('tempfiles')
+    .doc(owllyPDF.id as string)
+    .set(
+      {
+        skribble: true,
+        skribbleSigningUrl: skribbleSigningUrl,
+        firebasestorage: signedURL[0],
+      },
+      {
+        merge: true,
+      }
+    );
+
+  return {
+    url: signedURL[0],
+  };
 }
 
 export async function callGeneratePdfUrl(data: any, context: CallableContext): Promise<any | undefined> {
