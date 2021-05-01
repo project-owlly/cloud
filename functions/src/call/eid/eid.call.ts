@@ -46,7 +46,7 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
 
   const userData: any = await getEidUserData(eidToken.access_token, data.configuration);
 
-  const decoded = jwt.decode(eidToken.id_token);
+  //const decoded = jwt.decode(eidToken.id_token);
   const customtoken = await admin.auth().createCustomToken(data.configuration === 'sh' ? userData.sub : userData['zug:login_id'], {
     admin: true,
     configuration: data.configuration,
