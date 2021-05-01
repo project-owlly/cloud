@@ -34,7 +34,7 @@ interface OidcState {
 }
 
 export async function callOidcAuthUrlLogin(data: OidcAuthLoginDataRequest, context: CallableContext): Promise<OidcAuth | undefined> {
-  const scope: string = 'openid verified_simple';
+  const scope: string = 'openid zug:login_id given_name family_name email verified_simple';
 
   const oidAuth: Partial<OidcAuth> = await generateOidcAuthUrl(scope, {
     type: 'login',

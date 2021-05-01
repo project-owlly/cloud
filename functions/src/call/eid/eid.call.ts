@@ -20,6 +20,8 @@ import * as FormData from 'form-data';
 var jwt = require('jsonwebtoken');
 //import {auth} from 'firebase-admin';
 
+const db = admin.firestore();
+
 interface EidUserData {}
 
 interface EidLogin {
@@ -41,11 +43,28 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
   if (!eidToken) {
     return undefined;
   }
+
+  const userData: any = await getEidUserData(eidToken.access_token, data.configuration);
+
   const decoded = jwt.decode(eidToken.id_token);
-  const customtoken = await admin.auth().createCustomToken(decoded.sub, {
+  const customtoken = await admin.auth().createCustomToken(data.configuration === 'sh' ? userData.sub : userData['zug:login_id'], {
     admin: true,
     configuration: data.configuration,
   });
+
+  //create entry in db for user.
+  db.collection('userProfile')
+    .doc(data.configuration === 'sh' ? userData.sub : userData['zug:login_id'])
+    .set(
+      {
+        firstName: userData.given_name,
+        lastName: userData.family_name,
+        email: userData.email,
+      },
+      {
+        merge: true,
+      }
+    );
 
   //TODO: Validate token with public key from eid gateway.
 
