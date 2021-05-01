@@ -93,7 +93,7 @@ function generateAmountValidSignatures(doc: PDFKit.PDFDocument, data: any) {
     .fillColor('#000000')
     .font('fonts/Lato-Black.ttf')
     .fontSize(22)
-    .text(data.list.length, 40, 207);
+    .text(data.length, 40, 207);
 }
 
 function generateHashList(doc: PDFKit.PDFDocument, data: any) {
@@ -107,7 +107,7 @@ function generateHashList(doc: PDFKit.PDFDocument, data: any) {
   var xAxis = 35;
   var yAxis = 320;
   var rightColumn = false;
-  for (var i = 0; i < data.list.length; i++) {
+  for (var i = 0; i < data.length; i++) {
     if (320 + i * 20 > 600 && rightColumn == false) {
       xAxis = 306;
       yAxis = 320;
@@ -116,7 +116,7 @@ function generateHashList(doc: PDFKit.PDFDocument, data: any) {
     doc
       .fontSize(10)
       .font('fonts/Lato-Light.ttf')
-      .text(data.list[i], xAxis, yAxis);
+      .text(data[i], xAxis, yAxis);
     yAxis += 20;
   }
 }
