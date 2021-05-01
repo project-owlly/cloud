@@ -53,7 +53,8 @@ export async function callEidLogin(data: EidDataRequest, context: CallableContex
   });
 
   //create entry in db for user.
-  db.collection('userProfile')
+  await db
+    .collection('userProfile')
     .doc(data.configuration === 'sh' ? userData.sub : userData['zug:login_id'])
     .set(
       {
