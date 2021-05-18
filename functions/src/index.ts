@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions';
-import 'firebase-functions/lib/logger/compat';
 
 import {callbackError, callbackSuccess, callbackUpdate} from './request/skribble/skribble.callbacks';
 import {getOwlly} from './request/owlly/owlly.get';

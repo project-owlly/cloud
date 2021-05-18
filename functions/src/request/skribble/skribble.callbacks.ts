@@ -29,14 +29,19 @@ export function callbackSuccess(request: functions.Request, response: functions.
         response.end();
       }
       const token = await loginSkribble();
+      console.log('skribble: login done ' + token);
       const signatureRequest = await getSignatureRequest(signature_request, token);
-      const document = await downloadSignedPdf(document_id, token);
+      console.log('skribble signature request: ' + JSON.stringify(signatureRequest));
+      const documentBase64 = (await downloadSignedPdf(document_id, token)) as string;
+      console.log('skribble: download document done');
 
-      const pdfMetadata: any = await readPdfMetaData(document, signatureRequest.title + '_signiert.pdf'); //TODO: check this?
+      const documentBuffer = Buffer.from(documentBase64, 'base64'); //convert arraybuffer to buffer
+      const pdfMetadata: any = await readPdfMetaData(documentBuffer, signatureRequest.title + '_signiert.pdf'); //TODO: check this?
 
       if (pdfMetadata && pdfMetadata.owllyId && pdfMetadata.fileId) {
         //Get Temp File from "request" -> should be YES
         const docUnsigned: FirebaseFirestore.DocumentData = await db.collection('tempfiles').doc(pdfMetadata.fileId).get();
+        //check if already signed?
         const allreadySigned = await db.collectionGroup('files').where('eId', '==', pdfMetadata.eId).where('owllyId', '==', pdfMetadata.owllyId).get();
 
         if (docUnsigned.exists && !docUnsigned.data().statusSigned && allreadySigned.empty) {
@@ -51,7 +56,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .storage()
             .bucket()
             .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
-            .save(document, {
+            .save(documentBase64, {
               contentType: 'application/pdf',
             });
 
@@ -65,12 +70,11 @@ export function callbackSuccess(request: functions.Request, response: functions.
               expires: '2099-12-31', //TODO: CHANGE THIS!!!!
             });
 
-          const file = Buffer.from(document, 'binary');
-          const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
+          //const file = Buffer.from(document, 'binary');
+          const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), documentBuffer);
           const infoResult = OpenTimestamps.info(detached);
 
           //TIMESTAMP
-
           await OpenTimestamps.stamp(detached);
           const fileOts = detached.serializeToBytes();
 
@@ -140,7 +144,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
               },
               {
                 filename: docUnsigned.data().filename + '.pdf',
-                content: file,
+                content: documentBase64,
               },
             ]
           );
@@ -226,6 +230,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
 
       response.end();
     } catch (err) {
+      console.error(JSON.stringify(err));
       response.end();
     }
   });

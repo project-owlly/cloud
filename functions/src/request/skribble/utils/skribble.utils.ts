@@ -129,16 +129,18 @@ export async function sendErrorMail(email: string, name: string, errorMessage: s
 export function sendSuccessMail(email: string, name: string, hash: string, attachments: any[]) {
   return db.collection('mail').add({
     to: email,
-    message: {
-      attachments: attachments,
-    },
     template: {
       name: 'inboxSuccess',
       data: {
         firstName: name,
         hash: hash,
+        attachments: attachments,
       },
     },
+    message: {
+      attachments: attachments,
+    },
+    attachments: attachments,
   });
 }
 

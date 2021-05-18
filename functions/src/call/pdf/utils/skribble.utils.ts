@@ -120,18 +120,22 @@ export async function createSignatureRequest(
 }*/
 }
 
-export async function downloadSignedPdf(documentId: string, token: string): Promise<any> {
+export async function downloadSignedPdf(documentId: string, token: string): Promise<string | boolean> {
   let config = {
     method: 'get',
     url: 'https://api.skribble.com/v1/documents/' + documentId + '/content',
     headers: {
       Authorization: 'Bearer ' + token,
+      Accept: 'application/json',
     },
-    responseType: 'arraybuffer',
+    //responseType: 'arraybuffer',
   };
   try {
     const response = await axios(config);
-    return response.data;
+
+    return response.data.content;
+    //console.log("typ: " + response.data.content_type + "grösse: " + response.data.content_size );
+    //return response.data.content;
   } catch (e) {
     console.log(e);
     return false;

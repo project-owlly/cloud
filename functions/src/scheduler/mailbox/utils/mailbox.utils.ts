@@ -436,16 +436,18 @@ async function sendErrorMail(email: string, name: string, errorMessage: string) 
 function sendSuccessMail(email: string, name: string, hash: string, attachments: any[]) {
   return db.collection('mail').add({
     to: email,
-    message: {
-      attachments: attachments,
-    },
     template: {
       name: 'inboxSuccess',
       data: {
         firstName: name,
         hash: hash,
+        attachments: attachments,
       },
     },
+    meesage: {
+      attachments: attachments,
+    },
+    attachments: attachments,
   });
 }
 
