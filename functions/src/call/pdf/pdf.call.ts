@@ -97,6 +97,9 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   const hash = crypto.createHash('sha256');
   const eId: string = hash.update(data.userData.configuration === 'sh' ? data.userData.sub : data.userData['zug:login_id']).digest('hex'); // data.userData.sub;
 
+  //create "secret" verify number
+  data.verifyNumber = hash.update(data.userData.given_name + data.userData.family_name + data.userData.birth_date).digest('hex');
+
   if (!owllyId) {
     return {
       url: '',
