@@ -138,13 +138,15 @@ export function callbackSuccess(request: functions.Request, response: functions.
             docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name,
             hash,
             [
-              {
+              /*  {
                 filename: docUnsigned.data().filename + '.ots',
                 content: fileOts,
-              },
+              },*/
               {
                 filename: docUnsigned.data().filename + '.pdf',
                 content: documentBase64,
+                encoding: 'base64',
+                contentType: 'application/pdf',
               },
             ]
           );

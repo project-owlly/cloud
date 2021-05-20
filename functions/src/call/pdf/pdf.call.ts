@@ -1,5 +1,6 @@
 import {CallableContext} from 'firebase-functions/lib/providers/https';
 import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
 
 import {generatePDFDoc, generateBescheinigung} from './utils/pdf.utils';
 import {createSignatureRequest, loginSkribble} from './utils/skribble.utils';
@@ -94,11 +95,12 @@ export async function callGeneratePdfUrl(data: any, context: CallableContext): P
   let skribbleSigningUrl: string = '';
 
   const owllyId: string | undefined = data.owllyId;
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHmac('sha256', functions.config().digest.eid);
   const eId: string = hash.update(data.userData.configuration === 'sh' ? data.userData.sub : data.userData['zug:login_id']).digest('hex'); // data.userData.sub;
 
   //create "secret" verify number
-  data.verifyNumber = hash.update(data.userData.given_name + data.userData.family_name + data.userData.birth_date).digest('hex');
+  const verifyHash = crypto.createHmac('sha256', functions.config().digest.document);
+  data.verifyHash = verifyHash.update(data.userData.given_name + data.userData.family_name + data.userData.birth_date).digest('hex');
 
   if (!owllyId) {
     return {

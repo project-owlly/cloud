@@ -441,11 +441,7 @@ function sendSuccessMail(email: string, name: string, hash: string, attachments:
       data: {
         firstName: name,
         hash: hash,
-        attachments: attachments,
       },
-    },
-    meesage: {
-      attachments: attachments,
     },
     attachments: attachments,
   });

@@ -134,11 +134,7 @@ export function sendSuccessMail(email: string, name: string, hash: string, attac
       data: {
         firstName: name,
         hash: hash,
-        attachments: attachments,
       },
-    },
-    message: {
-      attachments: attachments,
     },
     attachments: attachments,
   });

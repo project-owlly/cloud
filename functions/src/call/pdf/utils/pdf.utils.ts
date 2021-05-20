@@ -276,14 +276,15 @@ function generatePDFFileId(doc: PDFKit.PDFDocument, data: any) {
     .fontSize(6)
     .text('Identifikation für die Stimmrechtsbescheinigung: ' + data.fileId, 0, 454, {
       align: 'center',
+    })
+    .text('Verifizierungscode: ' + data.verifyHash, 0, 460, {
+      align: 'center',
     });
 }
 
 async function generatePDFQRCode(doc: PDFKit.PDFDocument, data: any) {
   const url = await QRCode.toDataURL('https://owlly.ch/verify/' + data.fileId);
-  doc.image(url, 100, 454, {width: 50}).text('Verifizierungscode: ' + data.verifyNumber, {
-    align: 'center',
-  });
+  doc.image(url, 35, 420, {width: 50});
 }
 
 function generatePDFLine(doc: PDFKit.PDFDocument) {
