@@ -152,8 +152,8 @@ export function callbackSuccess(request: functions.Request, response: functions.
               },
               {
                 filename: docUnsigned.data().filename + '.ots',
-                content: fileOts, //btoa(String.fromCharCode(...new Uint8Array(fileOts))),
-                //encoding: 'base64',
+                content: Buffer.from(fileOts).toString('base64'),
+                encoding: 'base64',
               },
             ]
           );
