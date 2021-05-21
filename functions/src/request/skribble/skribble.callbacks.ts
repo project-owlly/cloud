@@ -21,19 +21,18 @@ export function callbackSuccess(request: functions.Request, response: functions.
       const document_id = request.param('document_id');
       const signature_request = request.param('signature_request');
 
-      console.log(tempFile + ' - ' + document_id + ' - ' + signature_request);
-
-      console.log('SUCCESS CALLBACK SKRIBBLE');
+      //console.log(tempFile + ' - ' + document_id + ' - ' + signature_request);
+      //console.log('SUCCESS CALLBACK SKRIBBLE');
 
       if (!tempFile || !document_id || !signature_request) {
         response.end();
       }
       const token = await loginSkribble();
-      console.log('skribble: login done ' + token);
+      //console.log('skribble: login done ' + token);
       const signatureRequest = await getSignatureRequest(signature_request, token);
-      console.log('skribble signature request: ' + JSON.stringify(signatureRequest));
+      //console.log('skribble signature request: ' + JSON.stringify(signatureRequest));
       const documentBase64 = (await downloadSignedPdf(document_id, token)) as string;
-      console.log('skribble: download document done');
+      //console.log('skribble: download document done');
 
       const documentBuffer = Buffer.from(documentBase64, 'base64'); //convert arraybuffer to buffer
       const pdfMetadata: any = await readPdfMetaData(documentBuffer, signatureRequest.title + '_signiert.pdf'); //TODO: check this?
@@ -117,19 +116,26 @@ export function callbackSuccess(request: functions.Request, response: functions.
             );
 
           // SAVE to POSTALCODE
-          await db.collection('owlly').doc(pdfMetadata.owllyId).collection('postalcode').doc(String(postalCode)).collection('files').add({
-            certified: false,
-            postalCode: postalCode,
-            imported: importDate,
-            generated: docUnsigned.data().generated,
-            firebasestorage: signedFileUrl[0],
-            opentimestamps: opentimestampsFileUrl[0],
-            hash: hash,
-            eId: pdfMetadata.eId,
-            owllyId: pdfMetadata.owllyId,
-            fileId: pdfMetadata.fileId,
-            data: docUnsigned.data().data,
-          });
+          await db
+            .collection('owlly')
+            .doc(pdfMetadata.owllyId)
+            .collection('postalcode')
+            .doc(String(postalCode))
+            .collection('files')
+            .add({
+              certified: false,
+              postalCode: postalCode,
+              imported: importDate,
+              generated: docUnsigned.data().generated,
+              firebasestorage: signedFileUrl[0],
+              opentimestamps: opentimestampsFileUrl[0],
+              opentimestampInfo: JSON.stringify(OpenTimestamps.info(detached)),
+              hash: hash,
+              eId: pdfMetadata.eId,
+              owllyId: pdfMetadata.owllyId,
+              fileId: pdfMetadata.fileId,
+              data: docUnsigned.data().data,
+            });
 
           //keep that to inform user, that he already signed.
           //await db.collection('owlly-admin').doc(pdfMetadata.owllyId).collection('unsigned').doc(pdfMetadata.eId).delete();
@@ -138,15 +144,16 @@ export function callbackSuccess(request: functions.Request, response: functions.
             docUnsigned.data().data.given_name + ' ' + docUnsigned.data().data.family_name,
             hash,
             [
-              /*  {
-                filename: docUnsigned.data().filename + '.ots',
-                content: fileOts,
-              },*/
               {
                 filename: docUnsigned.data().filename + '.pdf',
                 content: documentBase64,
                 encoding: 'base64',
                 contentType: 'application/pdf',
+              },
+              {
+                filename: docUnsigned.data().filename + '.ots',
+                content: btoa(String.fromCharCode(...new Uint8Array(fileOts))),
+                encoding: 'base64',
               },
             ]
           );

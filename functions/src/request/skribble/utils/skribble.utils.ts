@@ -126,7 +126,31 @@ export async function sendErrorMail(email: string, name: string, errorMessage: s
   });
 }
 
-export function sendSuccessMail(email: string, name: string, hash: string, attachments: any[]) {
+export async function sendSuccessMail(email: string, name: string, hash: string, attachments: any[]) {
+  await db
+    .collection('templates')
+    .doc('inboxSuccess')
+    .set(
+      {
+        attachments: [
+          {
+            filename: '{{PDFfilename}}',
+            content: '{{PDFcontent}}',
+            encoding: '{{PDFencoding}}',
+            contentType: '{{PDFcontentType}}',
+          },
+          {
+            filename: '{{OTSfilename}}',
+            content: '{{OTScontent}}',
+            encoding: '{{OTSencoding}}',
+          },
+        ],
+      },
+      {
+        merge: true,
+      }
+    );
+
   return db.collection('mail').add({
     to: email,
     template: {
@@ -134,9 +158,17 @@ export function sendSuccessMail(email: string, name: string, hash: string, attac
       data: {
         firstName: name,
         hash: hash,
+
+        PDFfilename: attachments[0].filename,
+        PDFcontent: attachments[0].content,
+        PDFencoding: attachments[0].encoding,
+        PDFcontentType: attachments[0].contentType,
+
+        OTSfilename: attachments[1].filename,
+        OTScontent: attachments[1].content,
+        OTSencoding: attachments[0].encoding,
       },
     },
-    attachments: attachments,
   });
 }
 
