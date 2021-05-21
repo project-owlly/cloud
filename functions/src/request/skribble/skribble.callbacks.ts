@@ -55,11 +55,8 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .storage()
             .bucket()
             .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
-            .save(documentBase64, {
+            .save(documentBuffer, {
               contentType: 'application/pdf',
-              metadata: {
-                test: 'test123',
-              },
             });
 
           //GET LINK
@@ -85,7 +82,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .storage()
             .bucket()
             .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
-            .save(Buffer.from(fileOts).toString('base64'));
+            .save(fileOts); //Buffer.from(fileOts).toString('base64')
 
           //GET SIGNED URL LINK from TIMESTAMPED FILE
           const opentimestampsFileUrl = await admin
