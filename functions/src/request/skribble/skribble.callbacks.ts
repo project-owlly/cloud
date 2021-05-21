@@ -57,6 +57,9 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
             .save(documentBase64, {
               contentType: 'application/pdf',
+              metadata: {
+                test: 'test123',
+              },
             });
 
           //GET LINK
