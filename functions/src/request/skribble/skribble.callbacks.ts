@@ -153,6 +153,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
                 filename: docUnsigned.data().filename + '.ots',
                 content: Buffer.from(fileOts).toString('base64'),
                 encoding: 'base64',
+                contentType: 'application/vnd.oasis.opendocument.spreadsheet-template',
               },
             ]
           );
