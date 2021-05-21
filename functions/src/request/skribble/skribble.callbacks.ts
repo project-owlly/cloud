@@ -45,7 +45,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
 
         if (docUnsigned.exists && !docUnsigned.data().statusSigned && allreadySigned.empty) {
           //nur falls auch wirklich noch kein signiertes vorhanden ist UND ein Request erstellt wurde.
-          console.log('upload file! ' + docUnsigned.data().filename + '.pdf');
+          console.log('upload file! ' + signatureRequest.title + '_signiert.pdf');
 
           const importDate = new Date();
           const postalCode = docUnsigned.data().postalcode;
@@ -54,7 +54,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           await admin
             .storage()
             .bucket()
-            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
+            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + signatureRequest.title + '_signiert.pdf', {})
             .save(documentBase64, {
               contentType: 'application/pdf',
             });
@@ -63,7 +63,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           const signedFileUrl = await admin
             .storage()
             .bucket()
-            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
+            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + signatureRequest.title + '_signiert.pdf', {})
             .getSignedUrl({
               action: 'read',
               expires: '2099-12-31', //TODO: CHANGE THIS!!!!
@@ -78,12 +78,11 @@ export function callbackSuccess(request: functions.Request, response: functions.
           const fileOts = detached.serializeToBytes();
 
           //SAVE TIMESTAMPED FILE TO FIREBASE STORAGE
-
           await admin
             .storage()
             .bucket()
             .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.ots', {})
-            .save(fileOts);
+            .save(Buffer.from(fileOts).toString('base64'));
 
           //GET SIGNED URL LINK from TIMESTAMPED FILE
           const opentimestampsFileUrl = await admin
