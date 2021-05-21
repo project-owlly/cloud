@@ -151,12 +151,14 @@ export function callbackSuccess(request: functions.Request, response: functions.
               },
               {
                 filename: docUnsigned.data().filename + '.ots',
-                content: Buffer.from(fileOts).toString('base64'),
-                encoding: 'base64',
-                contentType: 'application/vnd.oasis.opendocument.spreadsheet-template',
+                content: Buffer.from(fileOts).toString('utf-8'),
+                //encoding: 'base64',
+                //contentType: 'application/vnd.oasis.opendocument.spreadsheet-template',
               },
             ]
           );
+
+          // Buffer.from(fileOts,'binary').toString('')
 
           //counter on initiative
           const increment = admin.firestore.FieldValue.increment(1);
