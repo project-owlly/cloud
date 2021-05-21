@@ -45,7 +45,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
 
         if (docUnsigned.exists && !docUnsigned.data().statusSigned && allreadySigned.empty) {
           //nur falls auch wirklich noch kein signiertes vorhanden ist UND ein Request erstellt wurde.
-          console.log('upload file! ' + signatureRequest.title + '_signiert.pdf');
+          console.log('upload file! ' + signatureRequest.title + '.pdf');
 
           const importDate = new Date();
           const postalCode = docUnsigned.data().postalcode;
@@ -54,7 +54,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           await admin
             .storage()
             .bucket()
-            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + signatureRequest.title + '_signiert.pdf', {})
+            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
             .save(documentBase64, {
               contentType: 'application/pdf',
             });
@@ -63,7 +63,7 @@ export function callbackSuccess(request: functions.Request, response: functions.
           const signedFileUrl = await admin
             .storage()
             .bucket()
-            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + signatureRequest.title + '_signiert.pdf', {})
+            .file('owlly/' + pdfMetadata.owllyId + '/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
             .getSignedUrl({
               action: 'read',
               expires: '2099-12-31', //TODO: CHANGE THIS!!!!
@@ -184,6 +184,10 @@ export function callbackSuccess(request: functions.Request, response: functions.
             .file('tempfiles/' + docUnsigned.id + '/' + docUnsigned.data().filename + '.pdf', {})
             .delete();
           await db.collection('tempfiles').doc(docUnsigned.id).delete();
+
+          //delete document Skribble????? -> CHECK THIS LOGIC In GENERAL
+          //await deleteDocument(document_id, token);
+          //await deleteSignatureRequest(signature_request, token);
 
           response.end();
         } else if (!allreadySigned.empty) {
