@@ -142,7 +142,7 @@ export async function sendSuccessMail(email: string, name: string, hash: string,
           {
             filename: '{{OTSfilename}}',
             content: '{{OTScontent}}',
-            encoding: '{{OTSencoding}}',
+            //encoding: '{{OTSencoding}}',
           },
         ],
       },
@@ -166,7 +166,7 @@ export async function sendSuccessMail(email: string, name: string, hash: string,
 
         OTSfilename: attachments[1].filename,
         OTScontent: attachments[1].content,
-        OTSencoding: attachments[0].encoding,
+        //OTSencoding: attachments[0].encoding,
       },
     },
   });
