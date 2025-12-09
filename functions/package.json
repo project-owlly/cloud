@@ -20,7 +20,7 @@
     "cors": "^2.8.5",
     "date-fns": "^2.16.1",
     "date-fns-timezone": "^0.1.4",
-    "express": "^4.17.3",
+    "express": "^4.22.1",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.19.0",
     "form-data": "^3.0.4",
