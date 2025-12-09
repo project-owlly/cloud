@@ -30,7 +30,7 @@
     "openid-client": "^4.5.1",
     "opentimestamps": "^0.4.9",
     "pdfjs-dist": "^4.2.67",
-    "pdfkit": "^0.11.0",
+    "pdfkit": "^0.17.2",
     "qrcode": "^1.4.4",
     "react": "^17.0.1",
     "react-intl": "^5.10.4",
