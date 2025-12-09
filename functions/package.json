@@ -45,7 +45,7 @@
     "@types/pdfkit": "^0.10.6",
     "@types/qrcode": "^1.4.0",
     "firebase-functions-test": "^0.2.0",
-    "husky": "^4.3.0",
+    "husky": "^8.0.3",
     "prettier": "^2.1.1",
     "pretty-quick": "^3.0.1",
     "tslint": "^5.12.0",
