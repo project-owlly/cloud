@@ -29,7 +29,7 @@
     "jsonwebtoken": "^9.0.0",
     "openid-client": "^4.5.1",
     "opentimestamps": "^0.4.9",
-    "pdfjs-dist": "^4.2.67",
+    "pdfjs-dist": "^4.10.38",
     "pdfkit": "^0.17.2",
     "qrcode": "^1.4.4",
     "react": "^17.0.1",
